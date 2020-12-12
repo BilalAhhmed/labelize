@@ -1,5 +1,7 @@
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
+import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
+import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
 import 'package:labelize/view/signIn/signInScreen.dart';
 import 'package:labelize/widgets/CustomToast.dart';
@@ -26,6 +28,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     var _height = MediaQuery.of(context).size.height;
     var _width = MediaQuery.of(context).size.width;
+    TextStyle style =TextStyle(fontSize: 40, fontWeight: FontWeight.w300);
     return ColorfulSafeArea(
       color: Colors.white,
       child: Scaffold(
@@ -38,14 +41,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
             children: [
               Text(
                 'Sign Up',
-                style: TextStyle(fontSize: 40, fontWeight: FontWeight.w300),
+                style: style,
               ),
               SizedBox(
                 height: _height * 0.06,
               ),
-              buildSocialLogin(),
-              buildForm(),
-              buildButtons(context)
+              buildSocialLogin(_height, _width),
+              buildForm(_height),
+              buildButtons(context, _height, _width)
             ],
           ),
         ),
@@ -53,9 +56,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget buildSocialLogin() {
-    var _height = MediaQuery.of(context).size.height;
-    var _width = MediaQuery.of(context).size.width;
+  Widget buildSocialLogin( double _height, double _width) {
+    TextStyle style = TextStyle(color: Colors.white, fontSize: 16);
     return Column(
       children: [
         Container(
@@ -64,7 +66,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: FlatButton.icon(
             label: Text(
               'Sign in with Facebook',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: style
             ),
             icon: ImageIcon(
               AssetImage(
@@ -85,7 +87,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: FlatButton.icon(
             label: Text(
               'Sign in with Google',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: style
             ),
             icon: ImageIcon(
               AssetImage(
@@ -104,9 +106,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget buildForm() {
-    var _height = MediaQuery.of(context).size.height;
-    var _width = MediaQuery.of(context).size.width;
+  Widget buildForm(double _height) {
+
 
     return Form(
       key: _formKey,
@@ -124,6 +125,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               return null;
             },
             decoration: InputDecoration(
+                hintText: 'hello@mymail.com',
                 prefixIcon: ImageIcon(
                   AssetImage(
                     'assets/email.png',
@@ -143,7 +145,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             height: 18,
           ),
           Text(
-            'Username',
+            'User',
             style: TextStyle(color: Color(0xFF8F92A1), fontSize: 12),
           ),
           TextFormField(
@@ -153,6 +155,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               return null;
             },
             decoration: InputDecoration(
+                hintText: 'John',
                 prefixIcon: ImageIcon(
                   AssetImage(
                     'assets/user.png',
@@ -184,6 +187,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               return null;
             },
             decoration: InputDecoration(
+              hintText: '••••••••',
               prefixIcon: ImageIcon(
                 AssetImage(
                   'assets/pass.png',
@@ -231,9 +235,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget buildButtons(BuildContext context) {
-    var _height = MediaQuery.of(context).size.height;
-    var _width = MediaQuery.of(context).size.width;
+  Widget buildButtons(BuildContext context, double _height, double _width) {
+
     return Column(
       children: [
         Container(
@@ -243,11 +246,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               onPressed: () {
                 if (_formKey.currentState.validate()) {
                   if (checkedValue == true) {
-                    setState(() {
-                      isLoggingIn = true;
-                    });
+                    setState(
+                      () {
+                        isLoggingIn = true;
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, BottomNavigation.routeName, (route) => false);
+                      },
+                    );
                   } else {
-                    customToast(text: "Confirm Agreement");
+                    customToast(text: "Please Confirm Agreement");
                   }
                 }
               },
@@ -261,8 +268,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       'Sign Up',
                       style: TextStyle(color: Colors.white, fontSize: 15),
                     ),
-                    Icon(
-                      Icons.east,
+                    ImageIcon(
+                      AssetImage(
+                        'assets/arrow_right.png',
+                      ),
                       color: Colors.white,
                     )
                   ],

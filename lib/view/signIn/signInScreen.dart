@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
+import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
+import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
 import 'package:labelize/view/signUp/signUpScreen.dart';
 
@@ -39,9 +41,9 @@ class _SignInScreenState extends State<SignInScreen> {
               SizedBox(
                 height: _height * 0.06,
               ),
-              buildSocialLogin(),
-              buildForm(),
-              buildButtons(context)
+              buildSocialLogin(_height, _width),
+              buildForm(_height),
+              buildButtons(context, _height, _width)
             ],
           ),
         ),
@@ -49,9 +51,8 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget buildSocialLogin() {
-    var _height = MediaQuery.of(context).size.height;
-    var _width = MediaQuery.of(context).size.width;
+  Widget buildSocialLogin(double _height, double _width) {
+    TextStyle style = TextStyle(color: Colors.white, fontSize: 16);
     return Column(
       children: [
         Container(
@@ -60,7 +61,7 @@ class _SignInScreenState extends State<SignInScreen> {
           child: FlatButton.icon(
             label: Text(
               'Sign in with Facebook',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: style,
             ),
             icon: ImageIcon(
               AssetImage(
@@ -81,7 +82,7 @@ class _SignInScreenState extends State<SignInScreen> {
           child: FlatButton.icon(
             label: Text(
               'Sign in with Google',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: style,
             ),
             icon: ImageIcon(
               AssetImage(
@@ -100,9 +101,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget buildForm() {
-    var _height = MediaQuery.of(context).size.height;
-    var _width = MediaQuery.of(context).size.width;
+  Widget buildForm(double _height) {
     return Form(
       key: _formKey,
       child: Column(
@@ -119,6 +118,7 @@ class _SignInScreenState extends State<SignInScreen> {
               return null;
             },
             decoration: InputDecoration(
+                hintText: 'Username',
                 prefixIcon: ImageIcon(
                   AssetImage(
                     'assets/user.png',
@@ -150,6 +150,7 @@ class _SignInScreenState extends State<SignInScreen> {
               return null;
             },
             decoration: InputDecoration(
+              hintText: '••••••••',
               prefixIcon: ImageIcon(
                 AssetImage(
                   'assets/pass.png',
@@ -178,16 +179,15 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
           ),
-          SizedBox(height: _height * 0.06,
+          SizedBox(
+            height: _height * 0.06,
           )
         ],
       ),
     );
   }
 
-  Widget buildButtons(BuildContext context) {
-    var _height = MediaQuery.of(context).size.height;
-    var _width = MediaQuery.of(context).size.width;
+  Widget buildButtons(BuildContext context, double _height, double _width) {
     return Column(
       children: [
         Container(
@@ -198,6 +198,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 if (_formKey.currentState.validate()) {
                   setState(() {
                     isLoggingIn = true;
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, BottomNavigation.routeName, (route) => false);
                   });
                 }
               },
@@ -219,7 +221,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ),
             )),
-        SizedBox(height: _height * .1,
+        SizedBox(
+          height: _height * .1,
         ),
         InkWell(
           child: Text(
