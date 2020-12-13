@@ -7,7 +7,7 @@ import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.da
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
 import 'package:labelize/view/passwordReset/password_changeScreen.dart';
 import 'package:labelize/view/signIn/signInScreen.dart';
-import 'package:labelize/view/signUp/signUpScreen.dart';
+import 'package:labelize/view/signUp/signUppScreen.dart';
 import 'package:labelize/view/tasks/TasksScreen.dart';
 import 'view/splash/splash_Screen.dart';
 import 'view/tasks/TaskScreen2.dart';

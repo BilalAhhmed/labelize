@@ -3,7 +3,7 @@ import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
 import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
-import 'package:labelize/view/signUp/signUpScreen.dart';
+import 'package:labelize/view/signUp/signUppScreen.dart';
 
 import '../../project_theme.dart';
 
@@ -114,7 +114,7 @@ class _SignInScreenState extends State<SignInScreen> {
           TextFormField(
             controller: _emailController,
             validator: (value) {
-              if (value.isEmpty) return 'Please enter some text';
+              if (value.isEmpty) return '';
               return null;
             },
             decoration: InputDecoration(
@@ -147,7 +147,7 @@ class _SignInScreenState extends State<SignInScreen> {
             obscureText: visibility,
             controller: _passwordController,
             validator: (value) {
-              if (value.isEmpty) return 'Password';
+              if (value.isEmpty) return '';
               return null;
             },
             decoration: InputDecoration(

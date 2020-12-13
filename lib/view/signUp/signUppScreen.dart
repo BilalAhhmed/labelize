@@ -33,26 +33,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
       color: Colors.white,
       child: Scaffold(
           body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Sign Up',
-                style: style,
+            child: Padding(
+              padding: const EdgeInsets.all(30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sign Up',
+                    style: style,
+                  ),
+                  SizedBox(
+                    height: _height * 0.06,
+                  ),
+                  buildSocialLogin(_height, _width),
+                  buildForm(_height),
+                  buildButtons(context, _height, _width)
+                ],
               ),
-              SizedBox(
-                height: _height * 0.06,
-              ),
-              buildSocialLogin(_height, _width),
-              buildForm(_height),
-              buildButtons(context, _height, _width)
-            ],
-          ),
-        ),
-      )),
+            ),
+          )),
     );
   }
 
@@ -65,8 +65,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           width: _width * .82,
           child: FlatButton.icon(
             label: Text(
-              'Sign in with Facebook',
-              style: style
+                'Sign in with Facebook',
+                style: style
             ),
             icon: ImageIcon(
               AssetImage(
@@ -86,8 +86,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           width: _width * .82,
           child: FlatButton.icon(
             label: Text(
-              'Sign in with Google',
-              style: style
+                'Sign in with Google',
+                style: style
             ),
             icon: ImageIcon(
               AssetImage(
@@ -120,7 +120,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           TextFormField(
             controller: _emailController,
             validator: (value) {
-              if (value.isEmpty) return 'Please enter some text';
+              if (value.isEmpty) return '';
               return null;
             },
             decoration: InputDecoration(
@@ -152,11 +152,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             textAlign: TextAlign.start,
             controller: _userController,
             validator: (value) {
-              if (value.isEmpty) return 'Please enter some text';
+              if (value.isEmpty) return '';
               return null;
             },
             decoration: InputDecoration(
-              errorStyle: TextStyle(),
+                errorStyle: TextStyle(),
                 hintText: 'John',
                 hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
                 prefixIcon: ImageIcon(
@@ -186,7 +186,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             obscureText: visibility,
             controller: _passwordController,
             validator: (value) {
-              if (value.isEmpty) return 'Password';
+              if (value.isEmpty) return '';
               return null;
             },
             decoration: InputDecoration(
@@ -209,13 +209,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               suffixIcon: IconButton(
                 icon: visibility
                     ? Icon(
-                        Icons.visibility,
-                        color: Colors.black,
-                      )
+                  Icons.visibility,
+                  color: Colors.black,
+                )
                     : Icon(
-                        Icons.visibility_off_rounded,
-                        color: Colors.blue,
-                      ),
+                  Icons.visibility_off_rounded,
+                  color: Colors.blue,
+                ),
                 onPressed: visibilePassword,
               ),
             ),
@@ -251,7 +251,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 if (_formKey.currentState.validate()) {
                   if (checkedValue == true) {
                     setState(
-                      () {
+                          () {
                         isLoggingIn = true;
                         Navigator.pushNamedAndRemoveUntil(
                             context, BottomNavigation.routeName, (route) => false);

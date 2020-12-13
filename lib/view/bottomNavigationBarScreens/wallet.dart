@@ -163,7 +163,7 @@ class _WalletScreenState extends State<WalletScreen> {
               controller: _creditController,
               maxLines: 1,
               validator: (value) {
-                if (value.isEmpty) return 'Please enter some credits';
+                if (value.isEmpty) return '';
                 return null;
               },
               decoration: kInputDecoration
@@ -182,7 +182,7 @@ class _WalletScreenState extends State<WalletScreen> {
               controller: _emailController,
               maxLines: 1,
               validator: (value) {
-                if (value.isEmpty) return 'Please enter you Email';
+                if (value.isEmpty) return '';
                 return null;
               },
               decoration: kInputDecoration),

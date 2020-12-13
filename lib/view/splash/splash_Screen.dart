@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:labelize/view/signIn/signInScreen.dart';
-import 'package:labelize/view/signUp/signUpScreen.dart';
+import 'package:labelize/view/signUp/signUppScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatelessWidget {
