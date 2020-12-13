@@ -27,9 +27,12 @@ class _TasksScreenState extends State<TasksScreen> {
                   buildContainer(_height, _width),
                   buildAnswers(_height, _width),
                   SizedBox(height: _height * 0.02,),
-                  CustomRoundedButton(buttontitle: 'Next text',onPressed: (){
-                    Navigator.pushNamed(context, TaskScreen2.routeName);
-                  },)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: CustomRoundedButton(buttontitle: 'Next text',onPressed: (){
+                      Navigator.pushNamed(context, TaskScreen2.routeName);
+                    },),
+                  )
                 ],
               )),
         ),
@@ -131,6 +134,8 @@ class _TasksScreenState extends State<TasksScreen> {
       height: _height * 0.35,
 
       child: ListView(
+        shrinkWrap: true,
+        physics: BouncingScrollPhysics(),
         children: [
           buildAnswersContainer(_height, 'Politics'),
           buildAnswersContainer(_height, 'Sports'),

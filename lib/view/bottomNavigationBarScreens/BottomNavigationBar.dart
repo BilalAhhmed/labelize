@@ -29,8 +29,9 @@ class _BottomNavigationState extends State<BottomNavigation> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
-    _currentIndex = 2;
+  //  _pageController = PageController();
+  //  _currentIndex = 2;
+
   }
 
   @override
@@ -49,6 +50,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
         bottomNavigationBar: Container(
             height: _height * 0.1,
             decoration: BoxDecoration(
+              color: ProjectTheme.projectBackgroundColor,
               borderRadius: BorderRadius.only(
                   topRight: Radius.circular(30), topLeft: Radius.circular(30)),
               boxShadow: [

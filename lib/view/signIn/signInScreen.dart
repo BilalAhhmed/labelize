@@ -119,6 +119,7 @@ class _SignInScreenState extends State<SignInScreen> {
             },
             decoration: InputDecoration(
                 hintText: 'Username',
+                hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
                 prefixIcon: ImageIcon(
                   AssetImage(
                     'assets/user.png',
@@ -151,6 +152,7 @@ class _SignInScreenState extends State<SignInScreen> {
             },
             decoration: InputDecoration(
               hintText: '••••••••',
+              hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
               prefixIcon: ImageIcon(
                 AssetImage(
                   'assets/pass.png',

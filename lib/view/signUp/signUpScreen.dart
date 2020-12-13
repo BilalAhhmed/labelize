@@ -108,7 +108,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget buildForm(double _height) {
 
-
     return Form(
       key: _formKey,
       child: Column(
@@ -126,6 +125,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             },
             decoration: InputDecoration(
                 hintText: 'hello@mymail.com',
+                hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
                 prefixIcon: ImageIcon(
                   AssetImage(
                     'assets/email.png',
@@ -149,13 +149,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
             style: TextStyle(color: Color(0xFF8F92A1), fontSize: 12),
           ),
           TextFormField(
+            textAlign: TextAlign.start,
             controller: _userController,
             validator: (value) {
               if (value.isEmpty) return 'Please enter some text';
               return null;
             },
             decoration: InputDecoration(
+              errorStyle: TextStyle(),
                 hintText: 'John',
+                hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
                 prefixIcon: ImageIcon(
                   AssetImage(
                     'assets/user.png',
@@ -188,6 +191,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             },
             decoration: InputDecoration(
               hintText: '••••••••',
+              hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
               prefixIcon: ImageIcon(
                 AssetImage(
                   'assets/pass.png',

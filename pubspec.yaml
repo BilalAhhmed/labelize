@@ -35,6 +35,8 @@ dependencies:
   shared_preferences: ^0.5.12+4
   cloud_firestore: ^0.14.1+3
   colorful_safe_area: ^0.2.1
+  customtogglebuttons: ^0.0.5
+  rflutter_alert: ^1.1.0
 
 dev_dependencies:
   flutter_test:

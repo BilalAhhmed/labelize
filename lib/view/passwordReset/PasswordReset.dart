@@ -20,7 +20,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
     return ColorfulSafeArea(
       color: ProjectTheme.projectBackgroundColor,
       child: Scaffold(
-        appBar: buildAppbar(),
+        appBar: buildTopContent(),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(30),
@@ -45,7 +45,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
     );
   }
 
-  Widget buildAppbar() {
+  Widget buildTopContent() {
     return AppBar(
       leading: IconButton(
         icon: ImageIcon(

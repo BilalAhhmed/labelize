@@ -21,8 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
       color: ProjectTheme.projectBackgroundColor,
       child: Scaffold(
         body: Container(
-          color: Color(0xFFF3F6F8),
           height: _height,
+          color: Color(0xFFF3F6F8),
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.only(left: 30, right: 30, top: 10),
