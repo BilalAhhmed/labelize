@@ -23,24 +23,28 @@ class _WalletScreenState extends State<WalletScreen> {
     return ColorfulSafeArea(
         color: ProjectTheme.projectBackgroundColor,
         child: Scaffold(
-          body: SingleChildScrollView(
-            child: Container(
-              color: Color(0xFFF3F6F8),
-              height: _height,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildTopContent(_height),
-                  Divider(
-                    color: Colors.grey.withOpacity(0.3),
-                    thickness: 1,
-                  ),
-                  buildPaymentMethod(_height, _width),
-                  buildForm(_height),
-                  buildButton()
+          body: Container(
+            color: ProjectTheme.navigationBackgroundColor,
+            height: _height,
+            child: ListView(
+              shrinkWrap: true,
+              physics: BouncingScrollPhysics(),
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildTopContent(_height),
+                    Divider(
+                      color: Colors.grey.withOpacity(0.3),
+                      thickness: 1,
+                    ),
+                    buildPaymentMethod(_height, _width),
+                    buildForm(_height),
+                    buildButton()
 
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
           ),
         ));

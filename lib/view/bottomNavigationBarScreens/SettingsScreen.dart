@@ -18,21 +18,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     var _width = MediaQuery.of(context).size.width;
     return ColorfulSafeArea(
       color: ProjectTheme.projectBackgroundColor,
-      child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Settings',
-                style: TextStyle(fontSize: 40, fontWeight: FontWeight.w300),
+      child: Container(
+        child: Scaffold(
+          body: Container(
+            color: ProjectTheme.navigationBackgroundColor,
+            child: Padding(
+              padding: const EdgeInsets.all(30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Settings',
+                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.w300),
+                  ),
+                  SizedBox(
+                    height: _height * 0.03,
+                  ),
+                  buildForm(_height, _width)
+                ],
               ),
-              SizedBox(
-                height: _height * 0.03,
-              ),
-              buildForm(_height, _width)
-            ],
+            ),
           ),
         ),
       ),

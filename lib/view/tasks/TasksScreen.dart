@@ -107,21 +107,25 @@ class _TasksScreenState extends State<TasksScreen> {
     TextStyle style = TextStyle(
       fontSize: 17,
     );
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-              child: Text('What is this text about?',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18))),
-          SizedBox(
-            height: _height * 0.04,
-          ),
-          Text(
-              'A US teenage TikTok user’s attempt to spread awareness about China’s oppression of its Uighur Muslim population has renewed questions about censorship on the China-based social media company’s platform.',
-              style: style),
-        ],
-      ),
+    return ListView(
+      shrinkWrap: true,
+      physics: BouncingScrollPhysics(),
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+                child: Text('What is this text about?',
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18))),
+            SizedBox(
+              height: _height * 0.04,
+            ),
+            Text(
+                'A US teenage TikTok user’s attempt to spread awareness about China’s oppression of its Uighur Muslim population has renewed questions about censorship on the China-based social media company’s platform.',
+                style: style),
+          ],
+        ),
+      ],
     );
   }
 
