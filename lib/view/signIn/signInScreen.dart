@@ -1,9 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
+import 'package:labelize/services/constants.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
 import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
 import 'package:labelize/view/signUp/signUppScreen.dart';
+import 'package:labelize/widgets/CustomToast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../project_theme.dart';
 
@@ -14,11 +18,23 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool visibility = true;
   bool isLoggingIn = false;
+
+  getPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('loggedIn');
+  }
+
+  isLoggedIn(bool loggedIn) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('loggedIn', loggedIn);
+  }
+
   @override
   Widget build(BuildContext context) {
     var _height = MediaQuery.of(context).size.height;
@@ -200,9 +216,11 @@ class _SignInScreenState extends State<SignInScreen> {
                 if (_formKey.currentState.validate()) {
                   setState(() {
                     isLoggingIn = true;
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, BottomNavigation.routeName, (route) => false);
+                    //
                   });
+                  if (isLoggingIn) {
+                    _signInWithEmailAndPassword(context);
+                  }
                 }
               },
               color: ProjectTheme.projectPrimaryColor,
@@ -238,6 +256,40 @@ class _SignInScreenState extends State<SignInScreen> {
       ],
     );
   }
+
+  void _signInWithEmailAndPassword(BuildContext context)async {
+    try {
+      final User user = (await _auth.signInWithEmailAndPassword(email: _emailController.text.trim(), password: _passwordController.text.trim())).user;
+
+    if (user != null) {
+
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('loggedIn', true);
+      await prefs.setString('email', _emailController.text.trim());
+      await prefs.setString('password', _passwordController.text.trim());
+      setState(() {
+        Constants.user = user;
+        Constants.userId = user.uid;
+      });
+      Navigator.pushNamedAndRemoveUntil(
+              context, BottomNavigation.routeName, (route) => false);
+
+    } else {
+      setState(() {
+        isLoggingIn = false;
+      });
+    }
+    if (!user.emailVerified){}
+    }
+    catch (e) {
+      customToast(text: e.toString());
+      setState(() {
+        isLoggingIn = false;
+      });
+    }
+  }
+
 
   visibilePassword() {
     setState(() {

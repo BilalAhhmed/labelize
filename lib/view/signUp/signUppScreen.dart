@@ -5,6 +5,9 @@ import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.da
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
 import 'package:labelize/view/signIn/signInScreen.dart';
 import 'package:labelize/widgets/CustomToast.dart';
+import 'package:labelize/services/auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../project_theme.dart';
 
@@ -15,6 +18,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  AuthServices _authenticate = AuthServices();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _userController = TextEditingController();
@@ -28,35 +32,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     var _height = MediaQuery.of(context).size.height;
     var _width = MediaQuery.of(context).size.width;
-    TextStyle style =TextStyle(fontSize: 40, fontWeight: FontWeight.w300);
+    TextStyle style = TextStyle(fontSize: 40, fontWeight: FontWeight.w300);
     return ColorfulSafeArea(
       color: Colors.white,
       child: Scaffold(
           body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(30),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sign Up',
-                    style: style,
-                  ),
-                  SizedBox(
-                    height: _height * 0.06,
-                  ),
-                  buildSocialLogin(_height, _width),
-                  buildForm(_height),
-                  buildButtons(context, _height, _width)
-                ],
+        child: Padding(
+          padding: const EdgeInsets.all(30),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Sign Up',
+                style: style,
               ),
-            ),
-          )),
+              SizedBox(
+                height: _height * 0.06,
+              ),
+              buildSocialLogin(_height, _width),
+              buildForm(_height),
+              buildButtons(context, _height, _width)
+            ],
+          ),
+        ),
+      )),
     );
   }
 
-  Widget buildSocialLogin( double _height, double _width) {
+  Widget buildSocialLogin(double _height, double _width) {
     TextStyle style = TextStyle(color: Colors.white, fontSize: 16);
     return Column(
       children: [
@@ -64,10 +68,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           height: _height * 0.07,
           width: _width * .82,
           child: FlatButton.icon(
-            label: Text(
-                'Sign in with Facebook',
-                style: style
-            ),
+            label: Text('Sign in with Facebook', style: style),
             icon: ImageIcon(
               AssetImage(
                 'assets/fb.png',
@@ -85,10 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           height: _height * 0.07,
           width: _width * .82,
           child: FlatButton.icon(
-            label: Text(
-                'Sign in with Google',
-                style: style
-            ),
+            label: Text('Sign in with Google', style: style),
             icon: ImageIcon(
               AssetImage(
                 'assets/g.png',
@@ -107,7 +105,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget buildForm(double _height) {
-
     return Form(
       key: _formKey,
       child: Column(
@@ -209,13 +206,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               suffixIcon: IconButton(
                 icon: visibility
                     ? Icon(
-                  Icons.visibility,
-                  color: Colors.black,
-                )
+                        Icons.visibility,
+                        color: Colors.black,
+                      )
                     : Icon(
-                  Icons.visibility_off_rounded,
-                  color: Colors.blue,
-                ),
+                        Icons.visibility_off_rounded,
+                        color: Colors.blue,
+                      ),
                 onPressed: visibilePassword,
               ),
             ),
@@ -240,27 +237,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget buildButtons(BuildContext context, double _height, double _width) {
-
     return Column(
       children: [
         Container(
             height: _height * 0.07,
             width: _width * .82,
             child: FlatButton(
-              onPressed: () {
-                if (_formKey.currentState.validate()) {
-                  if (checkedValue == true) {
-                    setState(
-                          () {
-                        isLoggingIn = true;
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, BottomNavigation.routeName, (route) => false);
-                      },
-                    );
-                  } else {
-                    customToast(text: "Please Confirm Agreement");
-                  }
-                }
+              onPressed: () async {
+                _register(context);
               },
               color: ProjectTheme.projectPrimaryColor,
               child: Padding(
@@ -317,6 +301,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
         )
       ],
     );
+  }
+
+  void _register(BuildContext context) async {
+    if (_formKey.currentState.validate()) {
+      if (checkedValue == true) {
+        setState(() {
+          isLoggingIn = true;
+
+        });
+
+        if (isLoggingIn) {
+          dynamic result = await _authenticate.registerWithEmailandPassword(
+              email: _emailController.text.trim(),
+              userName: _userController.text.trim(),
+              password: _passwordController.text.trim());
+          if (result == null){
+            print('sorry couldn\'t register');
+            setState(() {
+              isLoggingIn =false;
+            });
+          } else if (result != null){
+            _emailController.clear();
+            _passwordController.clear();
+            _userController.clear();
+
+            Navigator.pushNamedAndRemoveUntil(
+                context, BottomNavigation.routeName, (route) => false);
+          }
+        }
+      }
+    }
   }
 
   visibilePassword() {
