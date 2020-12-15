@@ -246,15 +246,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
               onPressed: () async {
                 _register(context);
               },
-              color: ProjectTheme.projectPrimaryColor,
+              color: isLoggingIn? Colors.lightGreen : ProjectTheme.projectPrimaryColor,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Sign Up',
-                      style: TextStyle(color: Colors.white, fontSize: 15),
+                    !isLoggingIn
+                        ? const Text(
+                        'Sign Up',
+                        style: TextStyle(color: Colors.white, fontSize: 15))
+                        : const Text(
+                        'Signing Up..',
+                        style: TextStyle(color: Colors.white, fontSize: 15)
                     ),
                     ImageIcon(
                       AssetImage(

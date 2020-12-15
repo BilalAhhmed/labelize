@@ -223,15 +223,19 @@ class _SignInScreenState extends State<SignInScreen> {
                   }
                 }
               },
-              color: ProjectTheme.projectPrimaryColor,
+              color: isLoggingIn? Colors.lightGreen : ProjectTheme.projectPrimaryColor,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    !isLoggingIn
+                        ? const Text(
                       'Sign In',
-                      style: TextStyle(color: Colors.white, fontSize: 15),
+                      style: TextStyle(color: Colors.white, fontSize: 15))
+                        : const Text(
+                        'Signing In..',
+                        style: TextStyle(color: Colors.white, fontSize: 15)
                     ),
                     Icon(
                       Icons.arrow_forward_ios,
@@ -257,39 +261,37 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  void _signInWithEmailAndPassword(BuildContext context)async {
+  void _signInWithEmailAndPassword(BuildContext context) async {
     try {
-      final User user = (await _auth.signInWithEmailAndPassword(email: _emailController.text.trim(), password: _passwordController.text.trim())).user;
+      final User user = (await _auth.signInWithEmailAndPassword(
+              email: _emailController.text.trim(),
+              password: _passwordController.text.trim()))
+          .user;
 
-    if (user != null) {
-
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('loggedIn', true);
-      await prefs.setString('email', _emailController.text.trim());
-      await prefs.setString('password', _passwordController.text.trim());
-      setState(() {
-        Constants.user = user;
-        Constants.userId = user.uid;
-      });
-      Navigator.pushNamedAndRemoveUntil(
-              context, BottomNavigation.routeName, (route) => false);
-
-    } else {
-      setState(() {
-        isLoggingIn = false;
-      });
-    }
-    if (!user.emailVerified){}
-    }
-    catch (e) {
+      if (user != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('loggedIn', true);
+        await prefs.setString('email', _emailController.text.trim());
+        await prefs.setString('password', _passwordController.text.trim());
+        setState(() {
+          Constants.user = user;
+          Constants.userId = user.uid;
+        });
+        Navigator.pushNamedAndRemoveUntil(
+            context, BottomNavigation.routeName, (route) => false);
+      } else {
+        setState(() {
+          isLoggingIn = false;
+        });
+      }
+      if (!user.emailVerified) {}
+    } catch (e) {
       customToast(text: e.toString());
       setState(() {
         isLoggingIn = false;
       });
     }
   }
-
 
   visibilePassword() {
     setState(() {
