@@ -1,7 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:labelize/model/userModel.dart';
+import 'package:labelize/services/constants.dart';
+import 'package:labelize/services/database.dart';
+import 'package:labelize/view/signUp/signUppScreen.dart';
+import 'package:labelize/widgets/CustomToast.dart';
 import 'package:labelize/widgets/roundedButton.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../project_theme.dart';
 
@@ -12,6 +20,12 @@ class PasswordChangeScreen extends StatefulWidget {
 }
 
 class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
+  FirebaseAuth _auth = FirebaseAuth.instance;
+  DatabaseService database = DatabaseService(uId: Constants.userId);
+  final CollectionReference userdata =
+      FirebaseFirestore.instance.collection('user');
+  UserModel user;
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _oldPassController = TextEditingController();
   final TextEditingController _newPassController = TextEditingController();
@@ -25,57 +39,55 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
     return ColorfulSafeArea(
       color: ProjectTheme.projectBackgroundColor,
       child: Scaffold(
-        appBar: buildTopContent(),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 30, right: 30),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Settings',
-                      style:
-                          TextStyle(fontSize: 40, fontWeight: FontWeight.w300),
-                    ),
-                    IconButton(
-                      icon: visibility
-                          ? Icon(
-                              Icons.visibility,
-                              color: Colors.black,
-                            )
-                          : Icon(
-                              Icons.visibility_off_rounded,
-                              color: Colors.blue,
-                            ),
-                      onPressed: visibilePassword,
-                    ),
-                  ],
+          appBar: buildTopContent(),
+          body: StreamBuilder(
+            stream: database.userStream,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              List<UserModel> use = snapshot.data;
+              int index = 0;
+              for (int i = 0; i < use.length; i++) {
+                if (Constants.user.email == use[i].email) {
+                  index = i;
+                  break;
+                }
+              }
+              UserModel data = snapshot.data[index];
+
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 30, right: 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Change Password',
+                              style: TextStyle(
+                                  fontSize: 30, fontWeight: FontWeight.w300)),
+                          IconButton(
+                              icon: visibility
+                                  ? Icon(Icons.visibility, color: Colors.black)
+                                  : Icon(Icons.visibility_off_rounded,
+                                      color: Colors.blue),
+                              onPressed: visibilePassword)],
+                      ),
+                      SizedBox(height: _height * 0.03),
+                      buildForm(_height, _width),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: buildButton(data),
+                      )
+                    ],
+                  ),
                 ),
-                SizedBox(
-                  height: _height * 0.03,
-                ),
-                buildForm(_height, _width),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: CustomRoundedButton(
-                      buttontitle: 'Update Password',
-                      onPressed: () {
-                        if (_formKey.currentState.validate()){
-                          setState(() {
-                            isLoggingIn = true;
-                            Navigator.pop(context);
-                          });
-                        }
-                      }),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
+              );
+            },
+          )),
     );
   }
 
@@ -112,13 +124,13 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
           buildFormDetails(
               height: _height,
               width: _width,
-              title: 'Email',
+              title: 'New Password',
               detail: 'abc@gmail.com',
               dater: _newPassController),
           buildFormDetails(
             height: _height,
             width: _width,
-            title: 'Age',
+            title: 'Confirm Password',
             detail: '18',
             dater: _confirmPassController,
           ),
@@ -168,6 +180,43 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
         height: height * 0.02,
       ),
     ]);
+  }
+
+  Widget buildButton(var data) {
+    return CustomRoundedButton(
+      buttontitle: 'Update Password',
+      onPressed: () async {
+        print(data.password);
+        if (_formKey.currentState.validate()) {
+          if (_oldPassController.text == data.password) {
+            if (_oldPassController.text != _newPassController.text) {
+              if (_newPassController.text == _confirmPassController.text) {
+                Constants.user
+                    .updatePassword(_newPassController.text.trim())
+                    .then((_) async {
+                  await userdata
+                      .doc(Constants.user.uid)
+                      .update({'password': _newPassController.text.trim()});
+                  customToast(text: "Successfully changed");
+
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('loggedIn', false);
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, SignUpScreen.routeName, (route) => false);
+                  _auth.signOut();
+                });
+              } else {
+                customToast(text: "Password not matched");
+              }
+            } else {
+              customToast(text: "Old and New Password can't be same");
+            }
+          } else {
+            customToast(text: "Old Password not same");
+          }
+        }
+      },
+    );
   }
 
   visibilePassword() {

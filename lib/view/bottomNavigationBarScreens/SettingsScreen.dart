@@ -1,6 +1,10 @@
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
+import 'package:labelize/model/userModel.dart';
 import 'package:labelize/project_theme.dart';
+import 'package:labelize/services/constants.dart';
+import 'package:labelize/services/database.dart';
+import 'package:labelize/view/signIn/signInScreen.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:labelize/view/passwordReset/password_changeScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,8 +18,13 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final CollectionReference userdata =
+      FirebaseFirestore.instance.collection('user');
+
+  DatabaseService database = DatabaseService(uId: Constants.userId);
+
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
   FirebaseAuth _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
@@ -28,25 +37,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
           body: Container(
             color: ProjectTheme.navigationBackgroundColor,
             child: Padding(
-              padding: const EdgeInsets.all(30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildTopContent(),
-                  SizedBox(
-                    height: _height * 0.03,
-                  ),
-                  buildForm(_height, _width)
-                ],
-              ),
-            ),
+                padding: const EdgeInsets.all(30),
+                child: StreamBuilder(
+                  stream: database.userStream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(
+                          child: CircularProgressIndicator(
+                        backgroundColor: ProjectTheme.projectPrimaryColor,
+                      ));
+                    }
+                    List<UserModel> use = snapshot.data;
+                    int index = 0;
+                    for (int i = 0; i < use.length; i++) {
+                      if (Constants.user.email == use[i].email) {
+                        index = i;
+                        break;
+                      }
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        buildTopContent(),
+                        SizedBox(
+                          height: _height * 0.03,
+                        ),
+                        buildForm(_height, _width, snapshot.data[index])
+                      ],
+                    );
+                  },
+                )),
           ),
         ),
       ),
     );
   }
 
-  Widget buildTopContent (){
+  Widget buildTopContent() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -55,8 +82,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: TextStyle(fontSize: 40, fontWeight: FontWeight.w300),
         ),
         InkWell(
-          child: Text('Logout',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500,color: Colors.lightBlueAccent,decoration:TextDecoration.underline),),
-          onTap: () async{
+          child: Text(
+            'Logout',
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Colors.lightBlueAccent,
+                decoration: TextDecoration.underline),
+          ),
+          onTap: () async {
             final prefs = await SharedPreferences.getInstance();
             await prefs.setBool('loggedIn', false);
             Navigator.pushNamedAndRemoveUntil(
@@ -68,24 +102,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-
-  Widget buildForm(double _height, double _width) {
+  Widget buildForm(double _height, double _width, UserModel user) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        buildFormDetails(
+        buildEmaildetails(
             height: _height,
             width: _width,
-            title: 'Email',
-            detail: 'abc@gmail.com',
-        dater: _emailController),
+            detail: user.email,),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('Password'),
           SizedBox(
             height: _height * 0.02,
           ),
           InkWell(
-            onTap: (){
+            onTap: () {
               Navigator.pushNamed(context, PasswordChangeScreen.routeName);
             },
             child: Column(
@@ -105,25 +136,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
-
           SizedBox(
             height: _height * 0.02,
           ),
         ]),
-        buildFormDetails(
-            height: _height, width: _width, title: 'Age', detail: '18'),
+        buildAgeDetails(
+            height: _height,
+            width: _width,
+            detail: user.age,)
+
       ],
     );
   }
 
-  Widget buildFormDetails(
-      {String title,
+  Widget buildEmaildetails(
+      {UserModel user,
       String detail,
       double height,
-      double width,
-      TextEditingController dater}) {
+      double width,}) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(title),
+      Text('Email'),
       SizedBox(
         height: height * 0.02,
       ),
@@ -131,11 +163,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         onTap: () {
           return Alert(
               context: context,
-              title: title,
+              title: 'Email',
               content: Column(
                 children: [
                   TextField(
-                    controller: dater,
+                    controller: _emailController,
                   )
                 ],
               ),
@@ -143,10 +175,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 DialogButton(
                   color: ProjectTheme.projectPrimaryColor,
                   onPressed: () {
+                    Constants.user
+                        .updateEmail(_emailController.text.trim())
+                        .then((_) async {
+                      await userdata
+                          .doc(Constants.userId)
+                          .update({'email': _emailController.text.trim()});
 
-                    detail = dater.text;
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('loggedIn', false);
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, SignInScreen.routeName, (route) => false);
+                      _auth.signOut();
+                    });
+
                     Navigator.pop(context);
-                    print(detail);
 
                   },
                   child: Text(
@@ -173,7 +216,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
+      SizedBox(
+        height: height * 0.02,
+      ),
+    ]);
+  }
 
+  Widget buildAgeDetails(
+      {UserModel user,
+        String detail,
+        double height,
+        double width,}) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('Age'),
+      SizedBox(
+        height: height * 0.02,
+      ),
+      InkWell(
+        onTap: () {
+          return Alert(
+              context: context,
+              title: 'Age',
+              content: Column(
+                children: [
+                  TextField(
+                    controller: _ageController,
+                  )
+                ],
+              ),
+              buttons: [
+                DialogButton(
+                  color: ProjectTheme.projectPrimaryColor,
+                  onPressed: () async {
+                    userdata
+                          .doc(Constants.userId)
+                          .update({'age': _ageController.text.trim()});
+                    Navigator.pop(context);
+
+                  },
+                  child: Text(
+                    "Update",
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                )
+              ]).show();
+        },
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+             detail,
+              style: TextStyle(color: Colors.grey),
+            ),
+
+            SizedBox(
+              width: width,
+              height: 12,
+              child: Divider(
+                thickness: 1,
+              ),
+            ),
+          ],
+        ),
+      ),
       SizedBox(
         height: height * 0.02,
       ),

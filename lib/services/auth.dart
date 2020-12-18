@@ -7,11 +7,7 @@ import 'package:labelize/services/database.dart';
 class AuthServices {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future registerWithEmailandPassword (
-  {
-  @required String email, @required String userName, @required String password,
-}
-      ) async {
+  Future registerWithEmailandPassword ({@required String email, @required String userName, @required String password}) async {
     try{
       var result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User user = result.user;
@@ -35,4 +31,3 @@ class AuthServices {
     }
   }
 }
-

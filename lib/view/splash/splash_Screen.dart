@@ -48,8 +48,7 @@ class SplashScreen extends StatelessWidget {
       final User user = (await _auth.signInWithEmailAndPassword(
         email: prefsEmail.trim(),
         password: prefsPass.trim(),
-      ))
-          .user;
+      )).user;
 
       if (user != null) {
 

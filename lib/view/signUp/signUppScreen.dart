@@ -1,24 +1,32 @@
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
-import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
 import 'package:labelize/view/signIn/signInScreen.dart';
-import 'package:labelize/widgets/CustomToast.dart';
 import 'package:labelize/services/auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:labelize/services/fbAuth.dart';
+import 'package:labelize/services/googleAuth.dart';
 
 import '../../project_theme.dart';
 
 class SignUpScreen extends StatefulWidget {
   static const routeName = '/sign-up';
+
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  AuthServices _authenticate = AuthServices();
+  var firebaseAuth = FirebaseAuth.instance;
+  final fbLogin = new FacebookLogin();
+
+  GoogleSignIn googleAuth = new GoogleSignIn();
+  final _fbLogin = FbAuthServices();
+  final _googleLogin = GoogleAuthServices();
+  final _authenticate = AuthServices();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _userController = TextEditingController();
@@ -43,13 +51,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Sign Up',
-                style: style,
-              ),
-              SizedBox(
-                height: _height * 0.06,
-              ),
+              Text('Sign Up', style: style),
+              SizedBox(height: _height * 0.06),
               buildSocialLogin(_height, _width),
               buildForm(_height),
               buildButtons(context, _height, _width)
@@ -60,6 +63,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+
+
   Widget buildSocialLogin(double _height, double _width) {
     TextStyle style = TextStyle(color: Colors.white, fontSize: 16);
     return Column(
@@ -68,16 +73,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
           height: _height * 0.07,
           width: _width * .82,
           child: FlatButton.icon(
-            label: Text('Sign in with Facebook', style: style),
-            icon: ImageIcon(
-              AssetImage(
-                'assets/fb.png',
+              label: Text('Sign in with Facebook', style: style),
+              icon: ImageIcon(
+                AssetImage(
+                  'assets/fb.png',
+                ),
+                color: Colors.white,
               ),
-              color: Colors.white,
-            ),
-            color: Color(0xFF1877F2),
-            onPressed: () {},
-          ),
+              color: Color(0xFF1877F2),
+              onPressed: () async {
+                await _fbLogin.LoginWithFacebook(context);
+                Navigator.pushNamedAndRemoveUntil(
+                    context, BottomNavigation.routeName, (route) => false);
+              }),
         ),
         SizedBox(
           height: _height * 0.02,
@@ -94,7 +102,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               color: Colors.white,
             ),
             color: Color(0xFFF14336),
-            onPressed: () {},
+            onPressed: () async {
+              await _googleLogin.LoginWithGoogle(context);
+              CircularProgressIndicator();
+              Navigator.pushNamedAndRemoveUntil(
+                  context, BottomNavigation.routeName, (route) => false);
+            }
           ),
         ),
         SizedBox(
@@ -103,6 +116,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ],
     );
   }
+
+
 
   Widget buildForm(double _height) {
     return Form(
@@ -246,20 +261,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
               onPressed: () async {
                 _register(context);
               },
-              color: isLoggingIn? Colors.lightGreen : ProjectTheme.projectPrimaryColor,
+              color: isLoggingIn
+                  ? Colors.lightGreen
+                  : ProjectTheme.projectPrimaryColor,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     !isLoggingIn
-                        ? const Text(
-                        'Sign Up',
-                        style: TextStyle(color: Colors.white, fontSize: 15))
-                        : const Text(
-                        'Signing Up..',
-                        style: TextStyle(color: Colors.white, fontSize: 15)
-                    ),
+                        ? const Text('Sign Up',
+                            style: TextStyle(color: Colors.white, fontSize: 15))
+                        : const Text('Signing Up..',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 15)),
                     ImageIcon(
                       AssetImage(
                         'assets/arrow_right.png',
@@ -307,12 +322,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+
+
   void _register(BuildContext context) async {
     if (_formKey.currentState.validate()) {
       if (checkedValue == true) {
         setState(() {
           isLoggingIn = true;
-
         });
 
         if (isLoggingIn) {
@@ -320,12 +336,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               email: _emailController.text.trim(),
               userName: _userController.text.trim(),
               password: _passwordController.text.trim());
-          if (result == null){
+          if (result == null) {
             print('sorry couldn\'t register');
             setState(() {
-              isLoggingIn =false;
+              isLoggingIn = false;
             });
-          } else if (result != null){
+          } else if (result != null) {
             _emailController.clear();
             _passwordController.clear();
             _userController.clear();
@@ -337,6 +353,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     }
   }
+
+
 
   visibilePassword() {
     setState(() {
