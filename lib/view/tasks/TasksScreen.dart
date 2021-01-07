@@ -1,6 +1,9 @@
+import 'package:circular_check_box/circular_check_box.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
+import 'package:labelize/model/apiModel.dart';
 import 'package:labelize/project_theme.dart';
+import 'package:labelize/services/apiCall.dart';
 import 'package:labelize/view/tasks/TaskScreen2.dart';
 import 'package:labelize/widgets/roundedButton.dart';
 
@@ -11,6 +14,15 @@ class TasksScreen extends StatefulWidget {
 }
 
 class _TasksScreenState extends State<TasksScreen> {
+  ApiProvider apiProvider = ApiProvider();
+  ApiModel data;
+
+
+  int _index=0;
+  List _taskList = [];
+
+  bool submit = false;
+
   @override
   Widget build(BuildContext context) {
     var _height = MediaQuery.of(context).size.height;
@@ -19,23 +31,58 @@ class _TasksScreenState extends State<TasksScreen> {
       color: ProjectTheme.projectBackgroundColor,
       child: Scaffold(
         body: SingleChildScrollView(
-          child: Padding(
-              padding: const EdgeInsets.only(left: 30, right: 30, top: 10),
-              child: Column(
-                children: [
-                  buildTopContent(_height),
-                  buildContainer(_height, _width),
-                  buildAnswers(_height, _width),
-                  SizedBox(height: _height * 0.02,),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: CustomRoundedButton(buttontitle: 'Next text',onPressed: (){
-                      Navigator.pushNamed(context, TaskScreen2.routeName);
-                    },),
-                  )
-                ],
-              )),
-        ),
+            child: StreamBuilder(
+                stream: apiProvider.stream,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return Padding(
+                        padding: EdgeInsets.only(
+                            top: _height * 0.4,
+                            left: _width * 0.41,
+                            right: 20),
+                        child: CircularProgressIndicator());
+                  data = snapshot.data;
+                  _taskList = data.data.randomPackage.randomPackage;
+                  return Padding(
+                      padding:
+                          const EdgeInsets.only(left: 30, right: 30, top: 10),
+                      child: Column(
+                        children: [
+                          buildTopContent(_height),
+                          buildContainer(_height, _width, data),
+                          buildAnswers(_height, _width, data),
+                          SizedBox(
+                            height: _height * 0.02,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: CustomRoundedButton(
+                              buttontitle: submit?'Submit':'Next text',
+                              onPressed: () {
+                              setState(() {
+                                if (_index <_taskList.length-1){
+                                  _index++;
+
+                                  if(_index ==_taskList.length-1)
+                                    submit = !submit;
+                                }
+                                else if(submit)
+                                  {
+                                    print('Your paper is submitted');
+                                    //Navigator
+                                  }
+                                //return Text(' Tasks Completed');
+
+
+                              });
+
+
+                              },
+                            ),
+                          )
+                        ],
+                      ));
+                })),
       ),
     );
   }
@@ -59,7 +106,7 @@ class _TasksScreenState extends State<TasksScreen> {
         Align(
           alignment: Alignment.topCenter,
           child: Text(
-            'Task\n1/2'.toUpperCase(),
+            'Task\n${_index+1}/${_taskList.length}'.toUpperCase(),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.black,
@@ -75,7 +122,7 @@ class _TasksScreenState extends State<TasksScreen> {
     );
   }
 
-  Widget buildContainer(double _height, double _width) {
+  Widget buildContainer(double _height, double _width, ApiModel data) {
     return Column(
       children: [
         Container(
@@ -96,14 +143,16 @@ class _TasksScreenState extends State<TasksScreen> {
               Radius.circular(20),
             ),
           ),
-          child: buildCenterContent(_height, _width),
+          child: buildCenterContent(_height, _width, data),
         ),
-        SizedBox(height: _height * 0.04,)
+        SizedBox(
+          height: _height * 0.04,
+        )
       ],
     );
   }
 
-  Widget buildCenterContent(double _height, double _width) {
+  Widget buildCenterContent(double _height, double _width, ApiModel data) {
     TextStyle style = TextStyle(
       fontSize: 17,
     );
@@ -115,49 +164,46 @@ class _TasksScreenState extends State<TasksScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-                child: Text('What is this text about?',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18))),
+              child: Text('${data.data.randomPackage.randomPackage[_index].header}',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+            ),
+
             SizedBox(
               height: _height * 0.04,
             ),
-            Text(
-                'A US teenage TikTok user’s attempt to spread awareness about China’s oppression of its Uighur Muslim population has renewed questions about censorship on the China-based social media company’s platform.',
-                style: style),
+            Text('${data.data.randomPackage.randomPackage[_index].text}')
+
+            // Text(
+            //     'A US teenage TikTok user’s attempt to spread awareness about China’s oppression of its Uighur Muslim population has renewed questions about censorship on the China-based social media company’s platform.',
+            //     style: style),
           ],
         ),
       ],
     );
   }
 
-
-
-
-
-  Widget buildAnswers(double _height, double _width) {
+  Widget buildAnswers(double _height, double _width, ApiModel data) {
     return Container(
       height: _height * 0.35,
-
       child: ListView(
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
         children: [
-          buildAnswersContainer(_height, 'Politics'),
-          buildAnswersContainer(_height, 'Sports'),
-          buildAnswersContainer(_height, 'Entertainment'),
-          buildAnswersContainer(_height,'Technology'),
-
-
-
+          buildAnswersContainer(_height, '${data.data.randomPackage.randomPackage[_index].possibleLabel1}'),
+          buildAnswersContainer(_height, '${data.data.randomPackage.randomPackage[_index].possibleLabel2}'),
+          buildAnswersContainer(_height, '${data.data.randomPackage.randomPackage[_index].possibleLabel3}'),
+          buildAnswersContainer(_height, 'Technology'),
         ],
       ),
     );
   }
-  Widget buildAnswersContainer(double _height, String _title){
+
+  Widget buildAnswersContainer(double _height, String _title) {
     bool _value = false;
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 5,right: 5,top: 5),
+          padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
           child: Container(
             padding: EdgeInsets.only(left: 10),
             width: double.infinity,
@@ -166,21 +212,30 @@ class _TasksScreenState extends State<TasksScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black,
-                    offset: Offset(0, 0),
-                    spreadRadius: 1),
+                    color: Colors.black, offset: Offset(0, 0), spreadRadius: 1),
               ],
             ),
             child: Row(
               children: [
-                Icon(Icons.radio_button_off),
+                CircularCheckBox(
+                    value: _value,
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    onChanged: (bool x) {
+                      _value = !_value;
+                    }
+                ),
                 SizedBox(width: 15),
-                Text(_title,style: TextStyle(fontSize: 17),)
+                Text(
+                  _title,
+                  style: TextStyle(fontSize: 17),
+                )
               ],
             ),
           ),
         ),
-        SizedBox(height: _height *0.025,)
+        SizedBox(
+          height: _height * 0.025,
+        )
       ],
     );
   }

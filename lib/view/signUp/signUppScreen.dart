@@ -251,6 +251,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+
   Widget buildButtons(BuildContext context, double _height, double _width) {
     return Column(
       children: [

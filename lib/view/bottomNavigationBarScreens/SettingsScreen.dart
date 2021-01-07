@@ -73,6 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+
   Widget buildTopContent() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
