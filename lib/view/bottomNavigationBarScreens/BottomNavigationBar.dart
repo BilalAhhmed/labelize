@@ -4,7 +4,8 @@ import 'package:labelize/project_theme.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/InfoScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/NotificationScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/SettingsScreen.dart';
-import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
+import 'package:labelize/view/bottomNavigationBarScreens/home.dart';
+// import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/wallet.dart';
 
 class BottomNavigation extends StatefulWidget {
@@ -29,9 +30,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
   @override
   void initState() {
     super.initState();
-  //  _pageController = PageController();
-  //  _currentIndex = 2;
-
+    //  _pageController = PageController();
+    //  _currentIndex = 2;
   }
 
   @override

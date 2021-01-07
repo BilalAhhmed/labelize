@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,14 +6,10 @@ import 'package:labelize/model/apiModel.dart';
 import 'package:http/http.dart' as http;
 import 'package:labelize/services/constants.dart';
 
-
 class ApiProvider {
-
-
   String url =
       'https://us-central1-labelize-9aab6.cloudfunctions.net/getRandomPackageForUser?user_id=';
   String uId = Constants.userId;
-
 
   Future<ApiModel> getPost() async {
     final response = await http.get('$url+$uId', headers: {
@@ -21,23 +18,29 @@ class ApiProvider {
     print(response.body.toString());
 
     if (response.statusCode == 200) {
-      return apiCallFromJson(response.body);
+      if (jsonDecode(response.body)['statusText'] == 'error') {
+        print('error');
+        return null;
+      } else {
+        return apiCallFromJson(response.body);
+      }
     } else {
-      throw Exception('Failed to load Data');
+      // throw Exception('Failed to load Data');
+      return null;
     }
   }
 
-  // static Future<bool> getPackages ()async{
-  //
-  //   Constants.apiModel = await getPost();
-
+  Future<bool> getPackages() async {
+    Constants.apiModel = await getPost();
+    if (Constants.apiModel != null) {
+      return true;
+    } else
+      return false;
   }
 
   Stream<ApiModel> get stream {
     return getPost().asStream();
   }
-
-
 }
 
 // Future<http.Response> createPost(ApiCall post) async {

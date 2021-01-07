@@ -4,7 +4,7 @@ import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dar
 import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/companyDetailScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/wallet.dart';
-import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
+// import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
 import 'package:labelize/view/passwordReset/password_changeScreen.dart';
 import 'package:labelize/view/signIn/signInScreen.dart';

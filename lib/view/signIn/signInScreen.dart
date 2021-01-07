@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:labelize/services/constants.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
-import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
+// import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
 import 'package:labelize/view/signUp/signUppScreen.dart';
 import 'package:labelize/widgets/CustomToast.dart';
@@ -223,20 +223,20 @@ class _SignInScreenState extends State<SignInScreen> {
                   }
                 }
               },
-              color: isLoggingIn? Colors.lightGreen : ProjectTheme.projectPrimaryColor,
+              color: isLoggingIn
+                  ? Colors.lightGreen
+                  : ProjectTheme.projectPrimaryColor,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     !isLoggingIn
-                        ? const Text(
-                      'Sign In',
-                      style: TextStyle(color: Colors.white, fontSize: 15))
-                        : const Text(
-                        'Signing In..',
-                        style: TextStyle(color: Colors.white, fontSize: 15)
-                    ),
+                        ? const Text('Sign In',
+                            style: TextStyle(color: Colors.white, fontSize: 15))
+                        : const Text('Signing In..',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 15)),
                     Icon(
                       Icons.arrow_forward_ios,
                       color: Colors.white,

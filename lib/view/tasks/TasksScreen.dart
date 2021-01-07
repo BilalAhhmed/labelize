@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:labelize/model/apiModel.dart';
 import 'package:labelize/project_theme.dart';
 import 'package:labelize/services/apiCall.dart';
+import 'package:labelize/services/constants.dart';
 import 'package:labelize/view/tasks/TaskScreen2.dart';
+import 'package:labelize/widgets/CustomToast.dart';
 import 'package:labelize/widgets/roundedButton.dart';
 
 class TasksScreen extends StatefulWidget {
   static const routeName = '/Tasks';
+
   @override
   _TasksScreenState createState() => _TasksScreenState();
 }
@@ -17,11 +20,33 @@ class _TasksScreenState extends State<TasksScreen> {
   ApiProvider apiProvider = ApiProvider();
   ApiModel data;
 
-
-  int _index=0;
+  int _index = 0;
   List _taskList = [];
 
   bool submit = false;
+  bool hasData = false;
+
+  getData() async {
+    bool result = await apiProvider.getPackages();
+    setState(() {
+      hasData = result;
+    });
+    if (hasData) {
+      setState(() {
+        data = Constants.apiModel;
+        _taskList = data.data.randomPackage.randomPackage;
+      });
+    } else {
+      customToast(text: 'You are out of attempts');
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,59 +55,98 @@ class _TasksScreenState extends State<TasksScreen> {
     return ColorfulSafeArea(
       color: ProjectTheme.projectBackgroundColor,
       child: Scaffold(
-        body: SingleChildScrollView(
-            child: StreamBuilder(
-                stream: apiProvider.stream,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData)
-                    return Padding(
-                        padding: EdgeInsets.only(
-                            top: _height * 0.4,
-                            left: _width * 0.41,
-                            right: 20),
-                        child: CircularProgressIndicator());
-                  data = snapshot.data;
-                  _taskList = data.data.randomPackage.randomPackage;
-                  return Padding(
-                      padding:
-                          const EdgeInsets.only(left: 30, right: 30, top: 10),
-                      child: Column(
-                        children: [
-                          buildTopContent(_height),
-                          buildContainer(_height, _width, data),
-                          buildAnswers(_height, _width, data),
-                          SizedBox(
-                            height: _height * 0.02,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: CustomRoundedButton(
-                              buttontitle: submit?'Submit':'Next text',
-                              onPressed: () {
+        body: !hasData
+            ? Padding(
+                padding: EdgeInsets.only(
+                    top: _height * 0.4, left: _width * 0.41, right: 20),
+                child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: Padding(
+                    padding:
+                        const EdgeInsets.only(left: 30, right: 30, top: 10),
+                    child: Column(
+                      children: [
+                        buildTopContent(_height),
+                        buildContainer(_height, _width, data),
+                        buildAnswers(_height, _width, data),
+                        SizedBox(
+                          height: _height * 0.02,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: CustomRoundedButton(
+                            buttontitle: submit ? 'Submit' : 'Next text',
+                            onPressed: () {
                               setState(() {
-                                if (_index <_taskList.length-1){
+                                if (_index < _taskList.length - 1) {
                                   _index++;
 
-                                  if(_index ==_taskList.length-1)
+                                  if (_index == _taskList.length - 1)
                                     submit = !submit;
+                                } else if (submit) {
+                                  print('Your paper is submitted');
+                                  //Navigator
                                 }
-                                else if(submit)
-                                  {
-                                    print('Your paper is submitted');
-                                    //Navigator
-                                  }
                                 //return Text(' Tasks Completed');
-
-
                               });
-
-
-                              },
-                            ),
-                          )
-                        ],
-                      ));
-                })),
+                            },
+                          ),
+                        )
+                      ],
+                    )),
+                // child: StreamBuilder(
+                //     stream: apiProvider.stream,
+                //     builder: (context, snapshot) {
+                //       if (!snapshot.hasData)
+                //         return Padding(
+                //             padding: EdgeInsets.only(
+                //                 top: _height * 0.4,
+                //                 left: _width * 0.41,
+                //                 right: 20),
+                //             child: CircularProgressIndicator());
+                //       data = snapshot.data;
+                //       _taskList = data.data.randomPackage.randomPackage;
+                //       return Padding(
+                //           padding:
+                //               const EdgeInsets.only(left: 30, right: 30, top: 10),
+                //           child: Column(
+                //             children: [
+                //               buildTopContent(_height),
+                //               buildContainer(_height, _width, data),
+                //               buildAnswers(_height, _width, data),
+                //               SizedBox(
+                //                 height: _height * 0.02,
+                //               ),
+                //               Padding(
+                //                 padding: const EdgeInsets.symmetric(horizontal: 20),
+                //                 child: CustomRoundedButton(
+                //                   buttontitle: submit?'Submit':'Next text',
+                //                   onPressed: () {
+                //                   setState(() {
+                //                     if (_index <_taskList.length-1){
+                //                       _index++;
+                //
+                //                       if(_index ==_taskList.length-1)
+                //                         submit = !submit;
+                //                     }
+                //                     else if(submit)
+                //                       {
+                //                         print('Your paper is submitted');
+                //                         //Navigator
+                //                       }
+                //                     //return Text(' Tasks Completed');
+                //
+                //
+                //                   });
+                //
+                //
+                //                   },
+                //                 ),
+                //               )
+                //             ],
+                //           ));
+                //     })
+              ),
       ),
     );
   }
@@ -106,7 +170,7 @@ class _TasksScreenState extends State<TasksScreen> {
         Align(
           alignment: Alignment.topCenter,
           child: Text(
-            'Task\n${_index+1}/${_taskList.length}'.toUpperCase(),
+            'Task\n${_index + 1}/${_taskList.length}'.toUpperCase(),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.black,
@@ -164,7 +228,8 @@ class _TasksScreenState extends State<TasksScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Text('${data.data.randomPackage.randomPackage[_index].header}',
+              child: Text(
+                  '${data.data.randomPackage.randomPackage[_index].header}',
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
             ),
 
@@ -189,9 +254,12 @@ class _TasksScreenState extends State<TasksScreen> {
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
         children: [
-          buildAnswersContainer(_height, '${data.data.randomPackage.randomPackage[_index].possibleLabel1}'),
-          buildAnswersContainer(_height, '${data.data.randomPackage.randomPackage[_index].possibleLabel2}'),
-          buildAnswersContainer(_height, '${data.data.randomPackage.randomPackage[_index].possibleLabel3}'),
+          buildAnswersContainer(_height,
+              '${data.data.randomPackage.randomPackage[_index].possibleLabel1}'),
+          buildAnswersContainer(_height,
+              '${data.data.randomPackage.randomPackage[_index].possibleLabel2}'),
+          buildAnswersContainer(_height,
+              '${data.data.randomPackage.randomPackage[_index].possibleLabel3}'),
           buildAnswersContainer(_height, 'Technology'),
         ],
       ),
@@ -222,8 +290,7 @@ class _TasksScreenState extends State<TasksScreen> {
                     materialTapTargetSize: MaterialTapTargetSize.padded,
                     onChanged: (bool x) {
                       _value = !_value;
-                    }
-                ),
+                    }),
                 SizedBox(width: 15),
                 Text(
                   _title,
