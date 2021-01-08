@@ -3,11 +3,12 @@ import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
 import 'package:labelize/model/apiModel.dart';
 import 'package:labelize/project_theme.dart';
-import 'package:labelize/services/apiCall.dart';
+import 'package:labelize/services/singleApiDatabase.dart';
 import 'package:labelize/services/constants.dart';
 import 'package:labelize/view/tasks/TaskScreen2.dart';
 import 'package:labelize/widgets/CustomToast.dart';
 import 'package:labelize/widgets/roundedButton.dart';
+import 'package:labelize/model/allProjectsModel.dart';
 
 class TasksScreen extends StatefulWidget {
   static const routeName = '/Tasks';
@@ -20,21 +21,29 @@ class _TasksScreenState extends State<TasksScreen> {
   ApiProvider apiProvider = ApiProvider();
   ApiModel data;
 
+  AllProjectModel allProjectModel;
+
   int _index = 0;
   List _taskList = [];
+  List<List<String>> selectedLabels = List();
+
+
+
+  bool selected =  false;
 
   bool submit = false;
   bool hasData = false;
 
   getData() async {
-    bool result = await apiProvider.getPackages();
+    bool result =
+        await apiProvider.getPackages(projectId: 'hiL9a9RuYKNuWchwoLro');
     setState(() {
       hasData = result;
     });
     if (hasData) {
       setState(() {
         data = Constants.apiModel;
-        _taskList = data.data.randomPackage.randomPackage;
+        _taskList = data.randomPackage.randomPackage.packages;
       });
     } else {
       customToast(text: 'You are out of attempts');
@@ -62,90 +71,50 @@ class _TasksScreenState extends State<TasksScreen> {
                 child: CircularProgressIndicator())
             : SingleChildScrollView(
                 child: Padding(
-                    padding:
-                        const EdgeInsets.only(left: 30, right: 30, top: 10),
-                    child: Column(
-                      children: [
-                        buildTopContent(_height),
-                        buildContainer(_height, _width, data),
-                        buildAnswers(_height, _width, data),
-                        SizedBox(
-                          height: _height * 0.02,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: CustomRoundedButton(
-                            buttontitle: submit ? 'Submit' : 'Next text',
-                            onPressed: () {
-                              setState(() {
-                                if (_index < _taskList.length - 1) {
-                                  _index++;
+                  padding: const EdgeInsets.only(left: 30, right: 30, top: 10),
+                  child: Column(
+                    children: [
+                      buildTopContent(_height),
+                      buildContainer(_height, _width, data),
+                      buildAnswers(_height, _width, data),
+                      SizedBox(
+                        height: _height * 0.02,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: CustomRoundedButton(
+                          buttontitle: submit ? 'Submit' : 'Next text',
+                          onPressed: () {
+                            setState(() {
+                              if (_index < _taskList.length - 1) {
+                                _index++;
 
-                                  if (_index == _taskList.length - 1)
-                                    submit = !submit;
-                                } else if (submit) {
-                                  print('Your paper is submitted');
-                                  //Navigator
-                                }
-                                //return Text(' Tasks Completed');
-                              });
-                            },
-                          ),
-                        )
-                      ],
-                    )),
-                // child: StreamBuilder(
-                //     stream: apiProvider.stream,
-                //     builder: (context, snapshot) {
-                //       if (!snapshot.hasData)
-                //         return Padding(
-                //             padding: EdgeInsets.only(
-                //                 top: _height * 0.4,
-                //                 left: _width * 0.41,
-                //                 right: 20),
-                //             child: CircularProgressIndicator());
-                //       data = snapshot.data;
-                //       _taskList = data.data.randomPackage.randomPackage;
-                //       return Padding(
-                //           padding:
-                //               const EdgeInsets.only(left: 30, right: 30, top: 10),
-                //           child: Column(
-                //             children: [
-                //               buildTopContent(_height),
-                //               buildContainer(_height, _width, data),
-                //               buildAnswers(_height, _width, data),
-                //               SizedBox(
-                //                 height: _height * 0.02,
-                //               ),
-                //               Padding(
-                //                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                //                 child: CustomRoundedButton(
-                //                   buttontitle: submit?'Submit':'Next text',
-                //                   onPressed: () {
-                //                   setState(() {
-                //                     if (_index <_taskList.length-1){
-                //                       _index++;
-                //
-                //                       if(_index ==_taskList.length-1)
-                //                         submit = !submit;
-                //                     }
-                //                     else if(submit)
-                //                       {
-                //                         print('Your paper is submitted');
-                //                         //Navigator
-                //                       }
-                //                     //return Text(' Tasks Completed');
-                //
-                //
-                //                   });
-                //
-                //
-                //                   },
-                //                 ),
-                //               )
-                //             ],
-                //           ));
-                //     })
+                                List<String> adder = [
+                                  'label1',
+                                  'label1',
+                                  'label1'
+                                ];
+                                selectedLabels.add(adder);
+
+                                apiProvider.createPost(
+                                    labels: selectedLabels,
+                                    package_id: data.randomPackage.packageId,
+                                    time_taken: '1');
+
+                                if (_index == _taskList.length - 1)
+                                  submit = !submit;
+                              } else if (submit) {
+                                print('Your paper is submitted');
+                                //Navigator
+                              }
+                              //return Text(' Tasks Completed');
+                            });
+                          },
+                        ),
+                      )
+                    ],
+                  ),
+                ),
               ),
       ),
     );
@@ -217,9 +186,6 @@ class _TasksScreenState extends State<TasksScreen> {
   }
 
   Widget buildCenterContent(double _height, double _width, ApiModel data) {
-    TextStyle style = TextStyle(
-      fontSize: 17,
-    );
     return ListView(
       shrinkWrap: true,
       physics: BouncingScrollPhysics(),
@@ -229,18 +195,13 @@ class _TasksScreenState extends State<TasksScreen> {
           children: [
             Center(
               child: Text(
-                  '${data.data.randomPackage.randomPackage[_index].header}',
+                  '${data.randomPackage.randomPackage.packages[_index].header}',
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
             ),
-
             SizedBox(
               height: _height * 0.04,
             ),
-            Text('${data.data.randomPackage.randomPackage[_index].text}')
-
-            // Text(
-            //     'A US teenage TikTok user’s attempt to spread awareness about China’s oppression of its Uighur Muslim population has renewed questions about censorship on the China-based social media company’s platform.',
-            //     style: style),
+            Text('${data.randomPackage.randomPackage.packages[_index].text}')
           ],
         ),
       ],
@@ -249,25 +210,21 @@ class _TasksScreenState extends State<TasksScreen> {
 
   Widget buildAnswers(double _height, double _width, ApiModel data) {
     return Container(
-      height: _height * 0.35,
-      child: ListView(
-        shrinkWrap: true,
-        physics: BouncingScrollPhysics(),
-        children: [
-          buildAnswersContainer(_height,
-              '${data.data.randomPackage.randomPackage[_index].possibleLabel1}'),
-          buildAnswersContainer(_height,
-              '${data.data.randomPackage.randomPackage[_index].possibleLabel2}'),
-          buildAnswersContainer(_height,
-              '${data.data.randomPackage.randomPackage[_index].possibleLabel3}'),
-          buildAnswersContainer(_height, 'Technology'),
-        ],
-      ),
-    );
+        height: _height * 0.35,
+        child: ListView.builder(
+            shrinkWrap: true,
+            physics: BouncingScrollPhysics(),
+            itemCount:
+                data.randomPackage.randomPackage.packages[_index].labels.length,
+            itemBuilder: (BuildContext ctxt, int index) {
+              return buildAnswersContainer(_height,
+                  '${data.randomPackage.randomPackage.packages[_index].labels[index]}', );
+            }));
   }
 
-  Widget buildAnswersContainer(double _height, String _title) {
-    bool _value = false;
+  Widget buildAnswersContainer(double _height, String _title,) {
+
+
     return Column(
       children: [
         Padding(
@@ -286,10 +243,15 @@ class _TasksScreenState extends State<TasksScreen> {
             child: Row(
               children: [
                 CircularCheckBox(
-                    value: _value,
+                    checkColor: Colors.black,
+                    activeColor: Colors.transparent,
+                    value: selected,
                     materialTapTargetSize: MaterialTapTargetSize.padded,
-                    onChanged: (bool x) {
-                      _value = !_value;
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        selected = newValue;
+                      });
+
                     }),
                 SizedBox(width: 15),
                 Text(

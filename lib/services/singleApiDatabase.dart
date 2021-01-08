@@ -11,8 +11,10 @@ class ApiProvider {
       'https://us-central1-labelize-9aab6.cloudfunctions.net/getRandomPackageForUser?user_id=';
   String uId = Constants.userId;
 
-  Future<ApiModel> getPost() async {
-    final response = await http.get('$url+$uId', headers: {
+  String postUrl = 'https://us-central1-labelize-9aab6.cloudfunctions.net/updatePackageLabels';
+
+  Future<ApiModel> getPost({String projectID}) async {
+    final response = await http.get('$url+${uId}&project_id=${projectID}', headers: {
       HttpHeaders.contentTypeHeader: 'application/json',
     });
     print(response.body.toString());
@@ -22,7 +24,7 @@ class ApiProvider {
         print('error');
         return null;
       } else {
-        return apiCallFromJson(response.body);
+        return apiModelFromJson(response.body);
       }
     } else {
       // throw Exception('Failed to load Data');
@@ -30,8 +32,8 @@ class ApiProvider {
     }
   }
 
-  Future<bool> getPackages() async {
-    Constants.apiModel = await getPost();
+  Future<bool> getPackages({String projectId}) async {
+    Constants.apiModel = await getPost(projectID: projectId);
     if (Constants.apiModel != null) {
       return true;
     } else
@@ -41,14 +43,24 @@ class ApiProvider {
   Stream<ApiModel> get stream {
     return getPost().asStream();
   }
+
+
+
+  Future<http.Response> createPost({String package_id, String time_taken, List<List<String>> labels }) async {
+    final response = await http.post('$postUrl',
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+        body: {
+           "user_id": Constants.userId,
+          "package_id": package_id,
+          "time_taken":time_taken,
+          "labels":labels
+        }
+        );
+    return response;
+  }
+
 }
 
-// Future<http.Response> createPost(ApiCall post) async {
-//   final response = await http.post('$url',
-//       headers: {
-//         HttpHeaders.contentTypeHeader: 'application/json',
-//         HttpHeaders.authorizationHeader: ''
-//       },
-//       body: apiCallToJson(post));
-//   return response;
-// }
+

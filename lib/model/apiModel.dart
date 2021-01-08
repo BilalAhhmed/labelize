@@ -1,75 +1,75 @@
 // To parse this JSON data, do
 //
-//     final apiCall = apiCallFromJson(jsonString);
+//     final apiModel = apiModelFromJson(jsonString);
 
 import 'dart:convert';
 
-ApiModel apiCallFromJson(String str) => ApiModel.fromJson(json.decode(str));
+ApiModel apiModelFromJson(String str) => ApiModel.fromJson(json.decode(str));
 
-String apiCallToJson(ApiModel data) => json.encode(data.toJson());
+String apiModelToJson(ApiModel data) => json.encode(data.toJson());
 
 class ApiModel {
   ApiModel({
     this.statusText,
     this.message,
-    this.data,
+    this.randomPackage,
   });
 
   String statusText;
   String message;
-  Data data;
+  ApiModelRandomPackage randomPackage;
 
   factory ApiModel.fromJson(Map<String, dynamic> json) => ApiModel(
     statusText: json["statusText"],
     message: json["message"],
-    data: Data.fromJson(json["data"]),
+    randomPackage: ApiModelRandomPackage.fromJson(json["random_package"]),
   );
 
   Map<String, dynamic> toJson() => {
     "statusText": statusText,
     "message": message,
-    "data": data.toJson(),
-  };
-}
-
-class Data {
-  Data({
-    this.randomPackage,
-  });
-
-  DataRandomPackage randomPackage;
-
-  factory Data.fromJson(Map<String, dynamic> json) => Data(
-    randomPackage: DataRandomPackage.fromJson(json["random_package"]),
-  );
-
-  Map<String, dynamic> toJson() => {
     "random_package": randomPackage.toJson(),
   };
 }
 
-class DataRandomPackage {
-  DataRandomPackage({
+class ApiModelRandomPackage {
+  ApiModelRandomPackage({
     this.packageId,
     this.randomPackage,
   });
 
   String packageId;
-  List<RandomPackageElement> randomPackage;
+  RandomPackageRandomPackage randomPackage;
 
-  factory DataRandomPackage.fromJson(Map<String, dynamic> json) => DataRandomPackage(
+  factory ApiModelRandomPackage.fromJson(Map<String, dynamic> json) => ApiModelRandomPackage(
     packageId: json["package_id"],
-    randomPackage: List<RandomPackageElement>.from(json["random_package"].map((x) => RandomPackageElement.fromJson(x))),
+    randomPackage: RandomPackageRandomPackage.fromJson(json["random_package"]),
   );
 
   Map<String, dynamic> toJson() => {
     "package_id": packageId,
-    "random_package": List<dynamic>.from(randomPackage.map((x) => x.toJson())),
+    "random_package": randomPackage.toJson(),
   };
 }
 
-class RandomPackageElement {
-  RandomPackageElement({
+class RandomPackageRandomPackage {
+  RandomPackageRandomPackage({
+    this.packages,
+  });
+
+  List<Package> packages;
+
+  factory RandomPackageRandomPackage.fromJson(Map<String, dynamic> json) => RandomPackageRandomPackage(
+    packages: List<Package>.from(json["packages"].map((x) => Package.fromJson(x))),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "packages": List<dynamic>.from(packages.map((x) => x.toJson())),
+  };
+}
+
+class Package {
+  Package({
     this.userIdFrom2Answer,
     this.chosen2LabelByUser2,
     this.text,
@@ -83,6 +83,7 @@ class RandomPackageElement {
     this.chosen3LabelByUser3,
     this.possibleLabel2,
     this.userIdFrom1Answer,
+    this.labels
   });
 
   String userIdFrom2Answer;
@@ -98,8 +99,9 @@ class RandomPackageElement {
   String chosen3LabelByUser3;
   String possibleLabel2;
   String userIdFrom1Answer;
+  List<String> labels;
 
-  factory RandomPackageElement.fromJson(Map<String, dynamic> json) => RandomPackageElement(
+  factory Package.fromJson(Map<String, dynamic> json) => Package(
     userIdFrom2Answer: json["User_ID from #2 answer"],
     chosen2LabelByUser2: json["chosen #2 label by user #2"],
     text: json["text"],
@@ -113,6 +115,7 @@ class RandomPackageElement {
     chosen3LabelByUser3: json["chosen #3 label by user #3"],
     possibleLabel2: json["possible label 2"],
     userIdFrom1Answer: json["User_ID from #1 answer"],
+    labels: List<String>.from(json["labels"].map((x) => x)),
   );
 
   Map<String, dynamic> toJson() => {
@@ -129,71 +132,53 @@ class RandomPackageElement {
     "chosen #3 label by user #3": chosen3LabelByUser3,
     "possible label 2": possibleLabel2,
     "User_ID from #1 answer": userIdFrom1Answer,
+    "labels": List<dynamic>.from(labels.map((x) => x)),
   };
 }
 
-// enum UserIdFrom1Answer { EMPTY }
-//
-// final userIdFrom1AnswerValues = EnumValues({
-//   "-": UserIdFrom1Answer.EMPTY
-// });
-//
-// enum Header { WHAT_IS_THIS_TEXT_ABOUT }
-//
-// final headerValues = EnumValues({
-//   "What is this text about?": Header.WHAT_IS_THIS_TEXT_ABOUT
-// });
-//
-// enum PossibleLabel1 { POSITIVE }
-//
-// final possibleLabel1Values = EnumValues({
-//   "positive": PossibleLabel1.POSITIVE
-// });
-//
-// enum PossibleLabel2 { NEUTRAL }
-//
-// final possibleLabel2Values = EnumValues({
-//   "neutral": PossibleLabel2.NEUTRAL
-// });
-//
-// enum PossibleLabel3 { NEGATIVE }
-//
-// final possibleLabel3Values = EnumValues({
-//   "negative": PossibleLabel3.NEGATIVE
-// });
-//
-// class EnumValues<T> {
-//   Map<String, T> map;
-//   Map<T, String> reverseMap;
-//
-//   EnumValues(this.map);
-//
-//   Map<T, String> get reverse {
-//     if (reverseMap == null) {
-//       reverseMap = map.map((k, v) => new MapEntry(v, k));
-//     }
-//     return reverseMap;
-//   }
-// }
+enum UserIDfrom1Answer { EMPTY }
 
+final userIDfrom1AnswerValues = EnumValues({
+  "-": UserIDfrom1Answer.EMPTY
+});
 
+enum Header { HOWAREYOU_TEST }
 
+final headerValues = EnumValues({
+  "Howareyou?Test": Header.HOWAREYOU_TEST
+});
 
+enum Possiblelabel1 { POSITIVE }
 
+final possiblelabel1Values = EnumValues({
+  "positive": Possiblelabel1.POSITIVE
+});
 
+enum Possiblelabel2 { NEUTRAL }
 
+final possiblelabel2Values = EnumValues({
+  "neutral": Possiblelabel2.NEUTRAL
+});
 
+enum Possiblelabel3 { NEGATIVE }
 
+final possiblelabel3Values = EnumValues({
+  "negative": Possiblelabel3.NEGATIVE
+});
 
+class EnumValues<T> {
+  Map<String, T> map;
+  Map<T, String> reverseMap;
 
+  EnumValues(this.map);
 
-
-
-
-
-
-
-
+  Map<T, String> get reverse {
+    if (reverseMap == null) {
+      reverseMap = map.map((k, v) => new MapEntry(v, k));
+    }
+    return reverseMap;
+  }
+}
 
 
 
@@ -216,173 +201,137 @@ class RandomPackageElement {
 //
 // import 'dart:convert';
 //
-// ApiCall apiCallFromJson(String str) => ApiCall.fromJson(json.decode(str));
+// ApiModel apiCallFromJson(String str) => ApiModel.fromJson(json.decode(str));
 //
-// // String apiCallToJson(ApiCall data) => json.encode(data.toJson());
+// String apiCallToJson(ApiModel data) => json.encode(data.toJson());
 //
-// class ApiCall {
-//   ApiCall({
+// class ApiModel {
+//   ApiModel({
 //     this.statusText,
 //     this.message,
-//     this.data,
+//     this.random_package,
 //   });
 //
 //   String statusText;
 //   String message;
-//   Data data;
+//   ApiModelRandomPackage random_package;
 //
-//   factory ApiCall.fromJson(Map<String, dynamic> json) => ApiCall(
+//   factory ApiModel.fromJson(Map<String, dynamic> json) => ApiModel(
 //     statusText: json["statusText"],
 //     message: json["message"],
-//     data: Data.fromJson(json["data"]),
+//     random_package: ApiModelRandomPackage.fromJson(json["data"]),
 //   );
 //
 //   Map<String, dynamic> toJson() => {
 //     "statusText": statusText,
 //     "message": message,
-//     "data": data.toJson(),
+//     "data": random_package.toJson(),
 //   };
 // }
 //
-// class Data {
-//   Data({
+//
+//
+// class ApiModelRandomPackage {
+//   ApiModelRandomPackage({
+//     this.packageId,
 //     this.randomPackage,
 //   });
 //
-//   DataRandomPackage randomPackage;
-//
-//   factory Data.fromJson(Map<String, dynamic> json) => Data(
-//     randomPackage: DataRandomPackage.fromJson(json["random_package"]),
-//   );
-//
-//   Map<String, dynamic> toJson() => {
-//     "random_package": randomPackage.toJson(),
-//   };
-// }
-//
-// class DataRandomPackage {
-//   DataRandomPackage({
-//     this.packageId,
-//     this.randomPackageElement,
-//   });
-//
 //   String packageId;
-//   final List<RandomPackageElement> randomPackageElement;
+//   List<Package> randomPackage;
 //
-//   factory DataRandomPackage.fromJson(Map<String, dynamic> json) => DataRandomPackage(
+//   factory ApiModelRandomPackage.fromJson(Map<String, dynamic> json) => ApiModelRandomPackage(
 //     packageId: json["package_id"],
-//     randomPackageElement: RandomPackageElement.fromJson(json["random_package"]),
+//     randomPackage: List<Package>.from(json["random_package"].map((x) => Package.fromJson(x))),
 //   );
 //
 //   Map<String, dynamic> toJson() => {
 //     "package_id": packageId,
-//     "random_package": randomPackageElement.toJson()
+//     "random_package": List<dynamic>.from(randomPackage.map((x) => x.toJson())),
 //   };
 // }
 //
-// class RandomPackageElement {
-//   RandomPackageElement({
-//     this.userIdFromAnswer2,
-//     this.header,
-//     this.possibleLabel2,
-//     this.chosen2LabelByUser2,
-//     this.textId,
-//     this.possibleLabel3,
-//     this.userIdFrom3Answer,
-//     this.text,
-//     this.possibleLabel1,
-//     this.projectId,
-//     this.chosen3LabelByUser3,
-//     this.chosen1LabelByUser1,
-//     this.userIdFrom1Answer,
+// class RandomPackageRandomPackage {
+//   RandomPackageRandomPackage({
+//     this.packages,
 //   });
 //
-//   String userIdFromAnswer2;
-//   String header;
-//   String possibleLabel2;
-//   String chosen2LabelByUser2;
-//   int textId;
-//   String possibleLabel3;
-//   String userIdFrom3Answer;
-//   String text;
-//   String possibleLabel1;
-//   int projectId;
-//   String chosen3LabelByUser3;
-//   String chosen1LabelByUser1;
-//   String userIdFrom1Answer;
+//   List<Package> packages;
 //
-//   factory RandomPackageElement.fromJson(Map<String, dynamic> json) => RandomPackageElement(
-//     userIdFromAnswer2: json["User_ID from #2 answer"],
-//     header: json["Header"],
-//     possibleLabel2: json["possible label 2"],
-//     chosen2LabelByUser2: json["chosen #2 label by user #2"],
-//     textId: json["text ID"],
-//     possibleLabel3: json["possible label 3"],
-//     userIdFrom3Answer: json["User_ID from #3 answer"],
-//     text: json["text"],
-//     possibleLabel1: json["possible label 1"],
-//     projectId: json["Project ID"],
-//     chosen3LabelByUser3: json["chosen #3 label by user #3"],
-//     chosen1LabelByUser1: json["chosen #1 label by user #1"],
-//     userIdFrom1Answer: json["User_ID from #1 answer"],
+//   factory RandomPackageRandomPackage.fromJson(Map<String, dynamic> json) => RandomPackageRandomPackage(
+//     packages: List<Package>.from(json["packages"].map((x) => Package.fromJson(x))),
 //   );
 //
 //   Map<String, dynamic> toJson() => {
-//     "User_ID from #2 answer": userIdFromAnswer2,
-//     "Header": header,
-//     "possible label 2": possibleLabel2,
-//     "chosen #2 label by user #2": chosen2LabelByUser2,
-//     "text ID": textId,
-//     "possible label 3": userIdFrom3Answer,
-//     "text": text,
-//     "possible label 1": possibleLabel1,
-//     "Project ID": projectId,
-//     "chosen #3 label by user #3": chosen3LabelByUser3,
-//     "chosen #1 label by user #1": chosen1LabelByUser1,
-//     "User_ID from #1 answer": userIdFrom1Answer,
+//     "packages": List<dynamic>.from(packages.map((x) => x.toJson())),
 //   };
 // }
 //
-// // enum UserIdFrom1Answer { EMPTY }
-// //
-// // final userIdFrom1AnswerValues = EnumValues({
-// //   "-": UserIdFrom1Answer.EMPTY
-// // });
-// //
-// // enum Header { HOW_ARE_YOU_TEST }
-// //
-// // final headerValues = EnumValues({
-// //   "How are you? Test": Header.HOW_ARE_YOU_TEST
-// // });
-// //
-// // enum PossibleLabel1 { POSITIVE }
-// //
-// // final possibleLabel1Values = EnumValues({
-// //   "positive": PossibleLabel1.POSITIVE
-// // });
-// //
-// // enum PossibleLabel2 { NEUTRAL }
-// //
-// // final possibleLabel2Values = EnumValues({
-// //   "neutral": PossibleLabel2.NEUTRAL
-// // });
-// //
-// // enum PossibleLabel3 { NEGATIVE }
-// //
-// // final possibleLabel3Values = EnumValues({
-// //   "negative": PossibleLabel3.NEGATIVE
-// // });
-// //
-// // class EnumValues<T> {
-// //   Map<String, T> map;
-// //   Map<T, String> reverseMap;
-// //
-// //   EnumValues(this.map);
-// //
-// //   Map<T, String> get reverse {
-// //     if (reverseMap == null) {
-// //       reverseMap = map.map((k, v) => new MapEntry(v, k));
-// //     }
-// //     return reverseMap;
-// //   }
-// // }
+//
+// class Package {
+//   Package({
+//     this.userIdFrom2Answer,
+//     this.chosen2LabelByUser2,
+//     this.text,
+//     this.projectId,
+//     this.userIdFrom3Answer,
+//     this.possibleLabel3,
+//     this.possibleLabel1,
+//     this.header,
+//     this.textId,
+//     this.chosen1LabelByUser1,
+//     this.chosen3LabelByUser3,
+//     this.possibleLabel2,
+//     this.userIdFrom1Answer,
+//     this.labels
+//   });
+//
+//   String userIdFrom2Answer;
+//   String chosen2LabelByUser2;
+//   String text;
+//   int projectId;
+//   String userIdFrom3Answer;
+//   String possibleLabel3;
+//   String possibleLabel1;
+//   String header;
+//   int textId;
+//   String chosen1LabelByUser1;
+//   String chosen3LabelByUser3;
+//   String possibleLabel2;
+//   String userIdFrom1Answer;
+//   List<String> labels;
+//
+//   factory Package.fromJson(Map<String, dynamic> json) => Package(
+//     userIdFrom2Answer: json["User_ID from #2 answer"],
+//     chosen2LabelByUser2: json["chosen #2 label by user #2"],
+//     text: json["text"],
+//     projectId: json["Project ID"],
+//     userIdFrom3Answer: json["User_ID from #3 answer"],
+//     possibleLabel3: json["possible label 3"],
+//     possibleLabel1:json["possible label 1"],
+//     header: json["Header"],
+//     textId: json["text ID"],
+//     chosen1LabelByUser1: json["chosen #1 label by user #1"],
+//     chosen3LabelByUser3: json["chosen #3 label by user #3"],
+//     possibleLabel2: json["possible label 2"],
+//     userIdFrom1Answer: json["User_ID from #1 answer"],
+//     labels: List<String>.from(json["labels"].map((x) => x)),
+//   );
+//
+//   Map<String, dynamic> toJson() => {
+//     "User_ID from #2 answer": userIdFrom2Answer,
+//     "chosen #2 label by user #2": chosen2LabelByUser2,
+//     "text": text,
+//     "Project ID": projectId,
+//     "User_ID from #3 answer": userIdFrom3Answer,
+//     "possible label 3": possibleLabel3,
+//     "possible label 1": possibleLabel1,
+//     "Header": header,
+//     "text ID": textId,
+//     "chosen #1 label by user #1": chosen1LabelByUser1,
+//     "chosen #3 label by user #3": chosen3LabelByUser3,
+//     "possible label 2": possibleLabel2,
+//     "User_ID from #1 answer": userIdFrom1Answer,
+//     "labels": List<dynamic>.from(labels.map((x) => x)),
+//   };
+// }

@@ -1,8 +1,13 @@
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
 import 'package:labelize/view/tasks/TasksScreen.dart';
 import 'package:labelize/widgets/roundedButton.dart';
+import 'package:labelize/services/allProjectDatabase.dart';
+import 'package:labelize/model/allProjectsModel.dart';
+import 'package:labelize/services/constants.dart';
+import 'package:labelize/widgets/CustomToast.dart';
 
 import '../../project_theme.dart';
 
@@ -13,6 +18,42 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+  AllProjectsApiProvider allProjectsApiProvider = AllProjectsApiProvider();
+  AllProjectModel data;
+  int _index = 0;
+  List _taskList = [];
+
+  String packageId = Constants.packageId;
+
+  bool submit = false;
+  bool hasData = false;
+
+  SwiperController _scrollController;
+
+  getData() async {
+    bool result = await allProjectsApiProvider.getPackages();
+    setState(() {
+      hasData = result;
+    });
+    if (hasData) {
+      setState(() {
+        data = Constants.allProjectModel;
+        _taskList = data.data.projects;
+      });
+    } else {
+      customToast(text: 'You are out of attempts');
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     var _height = MediaQuery.of(context).size.height;
@@ -20,7 +61,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return ColorfulSafeArea(
       color: ProjectTheme.projectBackgroundColor,
       child: Scaffold(
-        body: Container(
+        body: !hasData
+            ? Padding(
+            padding: EdgeInsets.only(
+                top: _height * 0.4, left: _width * 0.41, right: 20),
+            child: CircularProgressIndicator())
+            : Container(
           height: _height,
           color: ProjectTheme.navigationBackgroundColor,
           child: SingleChildScrollView(
@@ -31,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   buildTopText(_height, _width),
-                  buildContainer(_height, _width),
+                  buildContainer(_height, _width,data),
                 ],
               ),
             ),
@@ -74,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildContainer(double _height, double _width) {
+  Widget buildContainer(double _height, double _width, AllProjectModel data) {
     return Container(
       height: _height * 0.6,
       width: _width,
@@ -93,42 +139,55 @@ class _HomeScreenState extends State<HomeScreen> {
           Radius.circular(20),
         ),
       ),
-      child: buildCenterContent(_height, _width),
+      child: buildCenterContent(_height, _width, data),
     );
   }
 
-  Widget buildCenterContent(double _height, double _width) {
+  Widget buildCenterContent(double _height, double _width, AllProjectModel data) {
     TextStyle style = TextStyle(fontSize: 15, letterSpacing: 1);
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Image(
-              image: AssetImage('assets/image.png'),
-              fit: BoxFit.contain,
+    return Swiper(
+
+      controller: _scrollController,
+      loop:  false,
+        itemCount: _taskList.length,
+            itemBuilder: (BuildContext context,int index ) {
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Image(
+                    image: AssetImage('assets/image.png'),
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                SizedBox(
+                  height: _height * 0.03,
+                ),
+                Text('Your Next Project!'.toUpperCase(), style: style),
+                SizedBox(
+                  height: _height * 0.045,
+                ),
+                Text(
+                    '${data.data.projects[index].description}',
+                    style: style),
+                SizedBox(
+                  height: _height * 0.05,
+                ),
+                CustomRoundedButton(buttontitle: 'Fetch the Task', onPressed: (){
+                  Navigator.pushNamed(context, TasksScreen.routeName);
+                },)
+              ],
             ),
-          ),
-          SizedBox(
-            height: _height * 0.03,
-          ),
-          Text('Your Next Project!'.toUpperCase(), style: style),
-          SizedBox(
-            height: _height * 0.045,
-          ),
-          Text(
-              'Do The Following Task From This Project And Receive Xxx Amount (Pre-Set In Admin Panel) Of Credits!',
-              style: style),
-          SizedBox(
-            height: _height * 0.13,
-          ),
-          CustomRoundedButton(buttontitle: 'Fetch the Task', onPressed: (){
-            Navigator.pushNamed(context, TasksScreen.routeName);
-          },)
-        ],
-      ),
+          );
+            },
     );
+
+
+
+
+
   }
 }
 
