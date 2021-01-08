@@ -26,10 +26,10 @@ class _TasksScreenState extends State<TasksScreen> {
   int _index = 0;
   List _taskList = [];
   List<List<String>> selectedLabels = List();
+  List<bool> checkBoxed = List();
+  List<String> adder = List();
 
-
-
-  bool selected =  false;
+  bool selected = false;
 
   bool submit = false;
   bool hasData = false;
@@ -44,6 +44,11 @@ class _TasksScreenState extends State<TasksScreen> {
       setState(() {
         data = Constants.apiModel;
         _taskList = data.randomPackage.randomPackage.packages;
+        for (int i = 0;
+            i < data.randomPackage.randomPackage.packages[0].labels.length;
+            i++) {
+          checkBoxed.add(false);
+        }
       });
     } else {
       customToast(text: 'You are out of attempts');
@@ -89,18 +94,21 @@ class _TasksScreenState extends State<TasksScreen> {
                               if (_index < _taskList.length - 1) {
                                 _index++;
 
-                                List<String> adder = [
-                                  'label1',
-                                  'label1',
-                                  'label1'
-                                ];
                                 selectedLabels.add(adder);
 
-                                apiProvider.createPost(
-                                    labels: selectedLabels,
-                                    package_id: data.randomPackage.packageId,
-                                    time_taken: '1');
-
+                                // apiProvider.createPost(
+                                //     labels: selectedLabels,
+                                //     package_id: data.randomPackage.packageId,
+                                //     time_taken: '1');
+                                for (int i = 0;
+                                    i <
+                                        data.randomPackage.randomPackage
+                                            .packages[_index].labels.length;
+                                    i++) {
+                                  checkBoxed.add(false);
+                                }
+                                adder.clear();
+                                print(selectedLabels);
                                 if (_index == _taskList.length - 1)
                                   submit = !submit;
                               } else if (submit) {
@@ -218,13 +226,13 @@ class _TasksScreenState extends State<TasksScreen> {
                 data.randomPackage.randomPackage.packages[_index].labels.length,
             itemBuilder: (BuildContext ctxt, int index) {
               return buildAnswersContainer(_height,
-                  '${data.randomPackage.randomPackage.packages[_index].labels[index]}', );
+                  '${data.randomPackage.randomPackage.packages[_index].labels[index]}',
+                  value: checkBoxed[index], index: index);
             }));
   }
 
-  Widget buildAnswersContainer(double _height, String _title,) {
-
-
+  Widget buildAnswersContainer(double _height, String _title,
+      {bool value, int index}) {
     return Column(
       children: [
         Padding(
@@ -245,13 +253,20 @@ class _TasksScreenState extends State<TasksScreen> {
                 CircularCheckBox(
                     checkColor: Colors.black,
                     activeColor: Colors.transparent,
-                    value: selected,
+                    value: value, //selected,
                     materialTapTargetSize: MaterialTapTargetSize.padded,
                     onChanged: (bool newValue) {
                       setState(() {
-                        selected = newValue;
-                      });
+                        checkBoxed.removeAt(index);
+                        checkBoxed.insert(index, newValue);
+                        if (checkBoxed.elementAt(index) == true) {
+                          adder.insert(index, _title);
+                        } else {
+                          adder.removeAt(index);
+                        }
 
+                        // selected = newValue;
+                      });
                     }),
                 SizedBox(width: 15),
                 Text(
