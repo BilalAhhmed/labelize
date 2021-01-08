@@ -25,9 +25,9 @@ class _TasksScreenState extends State<TasksScreen> {
 
   int _index = 0;
   List _taskList = [];
-  List<List<String>> selectedLabels = List();
-  List<bool> checkBoxed = List();
-  List<String> adder = List();
+  List<List<String>> selectedLabels = [];
+  List<bool> checkBoxed = [];
+  List<String> adder = [];
 
   bool selected = false;
 
@@ -49,6 +49,9 @@ class _TasksScreenState extends State<TasksScreen> {
             i++) {
           checkBoxed.add(false);
         }
+        // List<String> temp = ['1'];
+        //
+        // selectedLabels= List.filled(data.randomPackage.randomPackage.packages.length, temp );
       });
     } else {
       customToast(text: 'You are out of attempts');
@@ -94,7 +97,11 @@ class _TasksScreenState extends State<TasksScreen> {
                               if (_index < _taskList.length - 1) {
                                 _index++;
 
-                                selectedLabels.add(adder);
+                                List<String> temp = adder;
+
+                                selectedLabels.add(temp);
+                                print(selectedLabels);
+                                print(adder);
 
                                 // apiProvider.createPost(
                                 //     labels: selectedLabels,
@@ -105,10 +112,12 @@ class _TasksScreenState extends State<TasksScreen> {
                                         data.randomPackage.randomPackage
                                             .packages[_index].labels.length;
                                     i++) {
-                                  checkBoxed.add(false);
+                                  checkBoxed.insert(i,false);
                                 }
                                 adder.clear();
-                                print(selectedLabels);
+
+
+                                // print(selectedLabels);
                                 if (_index == _taskList.length - 1)
                                   submit = !submit;
                               } else if (submit) {
@@ -260,7 +269,8 @@ class _TasksScreenState extends State<TasksScreen> {
                         checkBoxed.removeAt(index);
                         checkBoxed.insert(index, newValue);
                         if (checkBoxed.elementAt(index) == true) {
-                          adder.insert(index, _title);
+                          adder.add(_title);
+                          print(adder);
                         } else {
                           adder.removeAt(index);
                         }
