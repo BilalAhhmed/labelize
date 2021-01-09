@@ -9,9 +9,13 @@ import 'package:labelize/view/tasks/TaskScreen2.dart';
 import 'package:labelize/widgets/CustomToast.dart';
 import 'package:labelize/widgets/roundedButton.dart';
 import 'package:labelize/model/allProjectsModel.dart';
+import 'package:labelize/widgets/CustomToast.dart';
 
 class TasksScreen extends StatefulWidget {
   static const routeName = '/Tasks';
+
+  String projectId;
+  TasksScreen({this.projectId});
 
   @override
   _TasksScreenState createState() => _TasksScreenState();
@@ -25,7 +29,7 @@ class _TasksScreenState extends State<TasksScreen> {
 
   int _index = 0;
   List _taskList = [];
-  List<List<String>> selectedLabels = [];
+  List<Map<String, List<String>>> selectedLabels = [];
   List<bool> checkBoxed = [];
   List<String> adder = [];
 
@@ -36,7 +40,7 @@ class _TasksScreenState extends State<TasksScreen> {
 
   getData() async {
     bool result =
-        await apiProvider.getPackages(projectId: 'hiL9a9RuYKNuWchwoLro');
+        await apiProvider.getPackages(projectId: '${widget.projectId}');
     setState(() {
       hasData = result;
     });
@@ -48,6 +52,7 @@ class _TasksScreenState extends State<TasksScreen> {
             i < data.randomPackage.randomPackage.packages[0].labels.length;
             i++) {
           checkBoxed.add(false);
+          // adder.add('1');
         }
         // List<String> temp = ['1'];
         //
@@ -92,40 +97,52 @@ class _TasksScreenState extends State<TasksScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: CustomRoundedButton(
                           buttontitle: submit ? 'Submit' : 'Next text',
-                          onPressed: () {
+                          onPressed: () async {
                             setState(() {
-                              if (_index < _taskList.length - 1) {
+                              List<String> temp = [];
+                              adder.forEach((element) {
+                                temp.add(element);
+                              });
+                              // selectedLabels.add(temp);
+                              Map<String, List<String>> tempMap = {
+                                'labels': temp
+                              };
+                              selectedLabels.add(tempMap);
+                              print(_index);
+                              print(selectedLabels);
+                            });
+
+                            if (_index < _taskList.length - 1) {
+                              setState(() {
                                 _index++;
 
-                                List<String> temp = adder;
-
-                                selectedLabels.add(temp);
-                                print(selectedLabels);
-                                print(adder);
-
-                                // apiProvider.createPost(
-                                //     labels: selectedLabels,
-                                //     package_id: data.randomPackage.packageId,
-                                //     time_taken: '1');
                                 for (int i = 0;
                                     i <
                                         data.randomPackage.randomPackage
                                             .packages[_index].labels.length;
                                     i++) {
-                                  checkBoxed.insert(i,false);
+                                  checkBoxed.insert(i, false);
                                 }
                                 adder.clear();
 
-
-                                // print(selectedLabels);
                                 if (_index == _taskList.length - 1)
                                   submit = !submit;
-                              } else if (submit) {
-                                print('Your paper is submitted');
-                                //Navigator
-                              }
-                              //return Text(' Tasks Completed');
-                            });
+                              });
+                            } else if (submit) {
+                              // print('Your paper is submitted');
+                              bool result = await apiProvider.createPost(
+                                  labels: selectedLabels,
+                                  package_id: data.randomPackage.packageId,
+                                  time_taken: '11:11');
+                              if (result) {
+                                customToast(
+                                    text: 'Your package has been sumitted');
+                                Navigator.pop(context);
+                              } else
+                                customToast(
+                                    text: 'Your package has been fail submit');
+                              //Navigator
+                            }
                           },
                         ),
                       )
@@ -270,11 +287,14 @@ class _TasksScreenState extends State<TasksScreen> {
                         checkBoxed.insert(index, newValue);
                         if (checkBoxed.elementAt(index) == true) {
                           adder.add(_title);
-                          print(adder);
                         } else {
-                          adder.removeAt(index);
+                          if (adder.contains(_title)) {
+                            adder.remove(_title);
+                          }
+                          // print(checkBoxed);
+                          // adder.removeAt(index);
                         }
-
+                        //print(adder);
                         // selected = newValue;
                       });
                     }),
