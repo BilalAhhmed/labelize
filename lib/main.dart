@@ -11,7 +11,7 @@ import 'package:labelize/view/signIn/signInScreen.dart';
 import 'package:labelize/view/signUp/signUppScreen.dart';
 import 'package:labelize/view/tasks/TasksScreen.dart';
 import 'view/splash/splash_Screen.dart';
-import 'view/tasks/TaskScreen2.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +37,6 @@ class MyApp extends StatelessWidget {
           PasswordResetScreen.routeName: (ctx) => PasswordResetScreen(),
           BottomNavigation.routeName: (ctx) => BottomNavigation(),
           TasksScreen.routeName: (ctx)=> TasksScreen(),
-          TaskScreen2.routeName: (ctx) => TaskScreen2(),
           PasswordChangeScreen.routeName: (ctx) => PasswordChangeScreen(),
           CompanyDetailScreen.routeName: (ctx) => CompanyDetailScreen()
         });

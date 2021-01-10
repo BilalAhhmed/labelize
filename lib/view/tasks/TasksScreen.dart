@@ -5,7 +5,6 @@ import 'package:labelize/model/apiModel.dart';
 import 'package:labelize/project_theme.dart';
 import 'package:labelize/services/singleApiDatabase.dart';
 import 'package:labelize/services/constants.dart';
-import 'package:labelize/view/tasks/TaskScreen2.dart';
 import 'package:labelize/widgets/CustomToast.dart';
 import 'package:labelize/widgets/roundedButton.dart';
 import 'package:labelize/model/allProjectsModel.dart';
@@ -136,11 +135,11 @@ class _TasksScreenState extends State<TasksScreen> {
                                   time_taken: '11:11');
                               if (result) {
                                 customToast(
-                                    text: 'Your package has been sumitted');
+                                    text: 'Your package has been submitted');
                                 Navigator.pop(context);
                               } else
                                 customToast(
-                                    text: 'Your package has been fail submit');
+                                    text: 'Your package has been failed to submit');
                               //Navigator
                             }
                           },

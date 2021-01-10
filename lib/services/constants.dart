@@ -10,5 +10,4 @@ class Constants {
   static ApiModel apiModel;
   static AllProjectModel allProjectModel;
 
-  static String packageId;
 }
