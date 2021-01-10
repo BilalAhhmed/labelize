@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:labelize/view/signIn/signInScreen.dart';
 import 'package:labelize/view/signUp/signUppScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,9 +20,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   AnimationController _animationController;
   Animation<double> animation;
 
+
+
+
+
   void initState() {
     super.initState();
     _animationController = AnimationController(duration: Duration(seconds: 2),vsync: this);
+
 
     final curvedAnimation = CurvedAnimation(parent: _animationController,curve: Curves.bounceIn,reverseCurve: Curves.easeOut);
 

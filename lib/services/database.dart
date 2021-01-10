@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:labelize/model/userModel.dart';
 
 class DatabaseService {
@@ -7,8 +8,10 @@ class DatabaseService {
   DatabaseService({this.uId, this.email});
   final CollectionReference user =
       FirebaseFirestore.instance.collection('user');
+  final FirebaseMessaging _fcm = FirebaseMessaging();
 
   Future UserData({
+
     String email,
     String userName,
     String password,
@@ -20,6 +23,7 @@ class DatabaseService {
       'password': password,
       'age': ''
     });
+
   }
 
   List<UserModel> getuser(QuerySnapshot qs) {
@@ -35,4 +39,21 @@ class DatabaseService {
   Stream<List<UserModel>> get userStream {
     return user.snapshots().map(getuser);
   }
+
+   Future _savedeviceToken() async{
+
+    String fcmToken = await _fcm.getToken();
+    if (fcmToken != null ){
+      var tokens = user
+          .doc(uId)
+          .collection('tokens')
+          .doc(fcmToken);
+      await tokens.set({
+        'token': fcmToken,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    }
+
+  }
+
 }

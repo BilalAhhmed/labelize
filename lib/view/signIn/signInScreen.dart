@@ -2,6 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:labelize/services/constants.dart';
+import 'package:labelize/services/fbAuth.dart';
+import 'package:labelize/services/googleAuth.dart';
+import 'package:labelize/services/tokenUpdate.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
 // import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
@@ -18,12 +21,15 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  final _fbLogin = FbAuthServices();
+  final _googleLogin = GoogleAuthServices();
   FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool visibility = true;
   bool isLoggingIn = false;
+  final SaveDeviceToken _saveToken = SaveDeviceToken();
 
   getPrefs() async {
     final prefs = await SharedPreferences.getInstance();
@@ -86,7 +92,12 @@ class _SignInScreenState extends State<SignInScreen> {
               color: Colors.white,
             ),
             color: Color(0xFF1877F2),
-            onPressed: () {},
+              onPressed: () async {
+                await _fbLogin.LoginWithFacebook(context);
+                _saveToken.SavedeviceToken();
+                Navigator.pushNamedAndRemoveUntil(
+                    context, BottomNavigation.routeName, (route) => false);
+              }
           ),
         ),
         SizedBox(
@@ -107,7 +118,14 @@ class _SignInScreenState extends State<SignInScreen> {
               color: Colors.white,
             ),
             color: Color(0xFFF14336),
-            onPressed: () {},
+              onPressed: () async {
+                await _googleLogin.LoginWithGoogle(context);
+                CircularProgressIndicator();
+
+                _saveToken.SavedeviceToken();
+                Navigator.pushNamedAndRemoveUntil(
+                    context, BottomNavigation.routeName, (route) => false);
+              }
           ),
         ),
         SizedBox(

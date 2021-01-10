@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:labelize/services/fbAuth.dart';
 import 'package:labelize/services/googleAuth.dart';
+import 'package:labelize/services/tokenUpdate.dart';
 
 import '../../project_theme.dart';
 
@@ -35,6 +36,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isLoggingIn = false;
   bool checkedValue = false;
   bool checkUser = false;
+
+  final SaveDeviceToken _saveToken = SaveDeviceToken();
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +88,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               color: Color(0xFF1877F2),
               onPressed: () async {
                 await _fbLogin.LoginWithFacebook(context);
+                _saveToken.SavedeviceToken();
                 Navigator.pushNamedAndRemoveUntil(
                     context, BottomNavigation.routeName, (route) => false);
               }),
@@ -105,6 +111,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             onPressed: () async {
               await _googleLogin.LoginWithGoogle(context);
               CircularProgressIndicator();
+
+              _saveToken.SavedeviceToken();
               Navigator.pushNamedAndRemoveUntil(
                   context, BottomNavigation.routeName, (route) => false);
             }
@@ -347,6 +355,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             _passwordController.clear();
             _userController.clear();
 
+            _saveToken.SavedeviceToken();
+
             Navigator.pushNamedAndRemoveUntil(
                 context, BottomNavigation.routeName, (route) => false);
           }
@@ -354,7 +364,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     }
   }
-
 
 
   visibilePassword() {

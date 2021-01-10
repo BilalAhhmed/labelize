@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
+import 'package:labelize/view/bottomNavigationBarScreens/NotificationScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/companyDetailScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/wallet.dart';
 // import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
@@ -11,6 +12,7 @@ import 'package:labelize/view/signIn/signInScreen.dart';
 import 'package:labelize/view/signUp/signUppScreen.dart';
 import 'package:labelize/view/tasks/TasksScreen.dart';
 import 'view/splash/splash_Screen.dart';
+import 'view/bottomNavigationBarScreens/NotificationScreen.dart';
 
 
 Future<void> main() async {
@@ -20,6 +22,9 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "Main Navigator");
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -38,7 +43,8 @@ class MyApp extends StatelessWidget {
           BottomNavigation.routeName: (ctx) => BottomNavigation(),
           TasksScreen.routeName: (ctx)=> TasksScreen(),
           PasswordChangeScreen.routeName: (ctx) => PasswordChangeScreen(),
-          CompanyDetailScreen.routeName: (ctx) => CompanyDetailScreen()
+          CompanyDetailScreen.routeName: (ctx) => CompanyDetailScreen(),
+          NotificationScreen.routeName: (ctx) => NotificationScreen()
         });
   }
 }
