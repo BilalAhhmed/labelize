@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:labelize/services/saveNotificationFirebase.dart';
 import 'package:labelize/widgets/CustomToast.dart';
 import 'package:labelize/widgets/Helper.dart';
 import 'package:labelize/services/pushNotificationService.dart';
@@ -8,45 +10,69 @@ import 'package:labelize/services/pushNotificationService.dart';
 import '../../project_theme.dart';
 
 class NotificationScreen extends StatefulWidget {
-
   static const routeName = '/notification';
+
+  // NotificationScreen(GlobalKey<NavigatorState> navigatorKey);
+
   @override
   _NotificationScreenState createState() => _NotificationScreenState();
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
   final FirebaseMessaging _fcm = FirebaseMessaging();
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "Main Navigator");
+  // final SaveNotificationFirebase saveNotificationFirebase = SaveNotificationFirebase();
 
-  String messageTitle = "No notification";
-  String notificationAlert = "Notification";
-  bool hasData = false;
+
+  String messageTitle = '';
+  String body = '';
+  int date = 0;
+bool hasData = false;
+
+
+
   getRegister() {
     _fcm.getToken().then((token) => print(token));
   }
 
-  getMessage() {
+
+
+  getMessage()  {
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: ${message}");
+        print("onMessage: $message");
+
+        body = message['notification']['body'];
+
+        if(body != null)
 
         setState(() {
           messageTitle = message['notification']['title'];
-          notificationAlert = message['notification']['body'];
+          body = message['notification']['body'];
+
         });
       },
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
+         body = message['data']['body'];
+
+         if(body != null)
         setState(() {
-          messageTitle = message['notification']['title'];
-          notificationAlert = message['notification']['body'];
+            hasData = true;
+          messageTitle = message['data']['title'];
+          body = message['data']['body'];
+          date = message['data']['google.sent_time'];
         });
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
+        body = message['data']['body'];
+
+        if(body != null)
         setState(() {
-          messageTitle = message['notification']['title'];
-          notificationAlert = message['notification']['body'];
+          hasData = true;
+          messageTitle = message['data']['title'];
+          body = message['data']['body'];
+          date = message['data']['google.sent_time'];
         });
       },
     );
@@ -54,7 +80,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   void initState() {
     super.initState();
-    getMessage();
+   // saveNotificationFirebase.SaveNotification();
+   //  getMessage();
   }
 
   @override
@@ -70,7 +97,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             Container(
                 padding: const EdgeInsets.all(30),
                 color: ProjectTheme.navigationBackgroundColor,
-                height: _height,
+                height: _height *0.85,
                 child: Column(
                   children: [
                     Text(
@@ -78,23 +105,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       style:
                           TextStyle(fontSize: 40, fontWeight: FontWeight.w300),
                     ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: ScrollPhysics(),
-                      itemCount: 1,
-                      itemBuilder: (BuildContext context, index) {
-                        return ListTile(
-                          title: Text('$notificationAlert'),
-                          subtitle: Text('$messageTitle'),
-                          trailing: Text(
-                            Helper.getDateNtime(
-                              DateTime.now(),
-                            ),
-                          ),
-                        );
-                      }
-
-                    ),
+                   !hasData ?
+                    Padding(
+                            padding: EdgeInsets.only(
+                                top: _height * 0.3,
+                                right: 20),
+                            child: Text('No Notiifications', style: TextStyle(fontSize: 20),))
+                        :
+                    // ListView.builder(
+                    //         shrinkWrap: true,
+                    //         physics: BouncingScrollPhysics(),
+                    //         itemCount: ,
+                    //         itemBuilder: (BuildContext context, index) {
+                    //           return
+                                ListTile(
+                                title: Text('$messageTitle'),
+                                subtitle: Text('$body'),
+                                trailing: Text(
+                                  '${Helper.getDateNtime(DateTime.fromMicrosecondsSinceEpoch(date * 1000))}'
+                                ),
+                              )
+                            // }),
                   ],
                 )
 

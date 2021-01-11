@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:labelize/view/signUp/signUppScreen.dart';
@@ -20,12 +21,72 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   AnimationController _animationController;
   Animation<double> animation;
 
+  final FirebaseMessaging _fcm = FirebaseMessaging();
+  // final SaveNotificationFirebase saveNotificationFirebase = SaveNotificationFirebase();
 
+
+  String messageTitle = '';
+  String body = '';
+  int date = 0;
+  bool hasData = false;
+
+
+
+  getMessage()  {
+    print('hello');
+    _fcm.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+
+        body = message['notification']['body'];
+
+        if(body != null)
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>BottomNavigation(index: 0,)));
+
+          //
+          // setState(() {
+          //   messageTitle = message['notification']['title'];
+          //   body = message['notification']['body'];
+          //
+          // });
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+        body = message['data']['body'];
+
+        if(body != null)
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>BottomNavigation(index: 0,)));
+
+        // setState(() {
+        //     hasData = true;
+        //     messageTitle = message['data']['title'];
+        //     body = message['data']['body'];
+        //     date = message['data']['google.sent_time'];
+        //   });
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+        body = message['data']['body'];
+
+        if(body != null)
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>BottomNavigation(index: 0,)));
+
+        // setState(() {
+        //     hasData = true;
+        //     messageTitle = message['data']['title'];
+        //     body = message['data']['body'];
+        //     date = message['data']['google.sent_time'];
+        //   });
+      },
+    );
+  }
 
 
 
   void initState() {
     super.initState();
+    getMessage();
+
     _animationController = AnimationController(duration: Duration(seconds: 2),vsync: this);
 
 

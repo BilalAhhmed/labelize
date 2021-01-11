@@ -10,12 +10,17 @@ import 'package:labelize/view/bottomNavigationBarScreens/wallet.dart';
 
 class BottomNavigation extends StatefulWidget {
   static const routeName = '/Bbar';
+  int index;
+  BottomNavigation({this.index});
   @override
   _BottomNavigationState createState() => _BottomNavigationState();
+
+
 }
 
 class _BottomNavigationState extends State<BottomNavigation> {
   int _currentIndex = 2;
+
   @override
   List<Widget> _children = [
     NotificationScreen(),
@@ -25,13 +30,18 @@ class _BottomNavigationState extends State<BottomNavigation> {
     InfoScreen()
   ];
 
-  PageController _pageController = PageController(initialPage: 2);
+  PageController _pageController;
+
+
 
   @override
   void initState() {
     super.initState();
     //  _pageController = PageController();
     //  _currentIndex = 2;
+
+    _currentIndex = widget.index??2;
+    _pageController = PageController(initialPage: _currentIndex);
   }
 
   @override

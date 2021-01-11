@@ -5,7 +5,6 @@ import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dar
 import 'package:labelize/view/bottomNavigationBarScreens/NotificationScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/companyDetailScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/wallet.dart';
-// import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
 import 'package:labelize/view/passwordReset/password_changeScreen.dart';
 import 'package:labelize/view/signIn/signInScreen.dart';
@@ -25,7 +24,6 @@ class MyApp extends StatelessWidget {
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "Main Navigator");
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
