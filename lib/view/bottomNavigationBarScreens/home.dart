@@ -24,8 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
   List _taskList = [];
 
-
-
   bool submit = false;
   bool hasData = false;
 
@@ -33,17 +31,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getData() async {
     bool result = await allProjectsApiProvider.getPackages();
-    setState(() {
-      hasData = result;
-    });
-    if (hasData) {
+    if (mounted) {
       setState(() {
-        data = Constants.allProjectModel;
-        _taskList = data.data.projects;
+        hasData = result;
       });
+    }
+    if (hasData) {
+      if (mounted) {
+        setState(() {
+          data = Constants.allProjectModel;
+          _taskList = data.data.projects;
+        });
+      }
     } else {
-      customToast(text: 'You are out of attempts');
-      Navigator.pop(context);
+      if (mounted) {
+        customToast(text: 'You are out of attempts');
+        Navigator.pop(context);
+      }
     }
   }
 

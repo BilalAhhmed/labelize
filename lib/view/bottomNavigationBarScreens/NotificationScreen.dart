@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:labelize/services/constants.dart';
 import 'package:labelize/services/saveNotificationFirebase.dart';
 import 'package:labelize/widgets/CustomToast.dart';
 import 'package:labelize/widgets/Helper.dart';
@@ -22,66 +23,76 @@ class _NotificationScreenState extends State<NotificationScreen> {
   final FirebaseMessaging _fcm = FirebaseMessaging();
   // final SaveNotificationFirebase saveNotificationFirebase = SaveNotificationFirebase();
 
-
   String messageTitle = '';
   String body = '';
   int date = 0;
-bool hasData = false;
-
-
+  bool hasData = false;
 
   getRegister() {
     _fcm.getToken().then((token) => print(token));
   }
 
-
-
-  getMessage()  {
+  getMessage() {
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
 
         body = message['notification']['body'];
 
-        if(body != null)
-
-        setState(() {
-          messageTitle = message['notification']['title'];
-          body = message['notification']['body'];
-
-        });
+        if (body != null)
+          setState(() {
+            messageTitle = message['notification']['title'];
+            body = message['notification']['body'];
+          });
       },
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
-         body = message['data']['body'];
+        body = message['data']['body'];
 
-         if(body != null)
-        setState(() {
-            hasData = true;
-          messageTitle = message['data']['title'];
-          body = message['data']['body'];
-          date = message['data']['google.sent_time'];
-        });
+        if (body != null)
+          setState(() {
+            // hasData = true;
+            messageTitle = message['data']['title'];
+            body = message['data']['body'];
+            date = message['data']['google.sent_time'];
+          });
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
         body = message['data']['body'];
 
-        if(body != null)
-        setState(() {
-          hasData = true;
-          messageTitle = message['data']['title'];
-          body = message['data']['body'];
-          date = message['data']['google.sent_time'];
-        });
+        if (body != null)
+          setState(() {
+            // hasData = true;
+            messageTitle = message['data']['title'];
+            body = message['data']['body'];
+            date = message['data']['google.sent_time'];
+          });
       },
     );
   }
 
   void initState() {
     super.initState();
-   // saveNotificationFirebase.SaveNotification();
-   //  getMessage();
+    // saveNotificationFirebase.SaveNotification();
+    //  getMessage();
+
+    // print(NotificationMsgs.messageTitle);
+    if (mounted) {
+      setState(() {
+        if (NotificationMsgs.messageTitle != null) {
+          messageTitle = NotificationMsgs.messageTitle;
+          body = NotificationMsgs.body;
+          date = NotificationMsgs.date;
+          hasData = true;
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -97,7 +108,7 @@ bool hasData = false;
             Container(
                 padding: const EdgeInsets.all(30),
                 color: ProjectTheme.navigationBackgroundColor,
-                height: _height *0.85,
+                height: _height * 0.85,
                 child: Column(
                   children: [
                     Text(
@@ -105,27 +116,28 @@ bool hasData = false;
                       style:
                           TextStyle(fontSize: 40, fontWeight: FontWeight.w300),
                     ),
-                   !hasData ?
-                    Padding(
-                            padding: EdgeInsets.only(
-                                top: _height * 0.3,
-                                right: 20),
-                            child: Text('No Notiifications', style: TextStyle(fontSize: 20),))
+                    !hasData
+                        ? Padding(
+                            padding:
+                                EdgeInsets.only(top: _height * 0.3, right: 20),
+                            child: Text(
+                              'No Notiifications',
+                              style: TextStyle(fontSize: 20),
+                            ))
                         :
-                    // ListView.builder(
-                    //         shrinkWrap: true,
-                    //         physics: BouncingScrollPhysics(),
-                    //         itemCount: ,
-                    //         itemBuilder: (BuildContext context, index) {
-                    //           return
-                                ListTile(
-                                title: Text('$messageTitle'),
-                                subtitle: Text('$body'),
-                                trailing: Text(
-                                  '${Helper.getDateNtime(DateTime.fromMicrosecondsSinceEpoch(date * 1000))}'
-                                ),
-                              )
-                            // }),
+                        // ListView.builder(
+                        //         shrinkWrap: true,
+                        //         physics: BouncingScrollPhysics(),
+                        //         itemCount: ,
+                        //         itemBuilder: (BuildContext context, index) {
+                        //           return
+                        ListTile(
+                            title: Text('$messageTitle'),
+                            subtitle: Text('$body'),
+                            trailing: Text(
+                                '${Helper.getDateNtime(DateTime.fromMicrosecondsSinceEpoch(date * 1000))}'),
+                          )
+                    // }),
                   ],
                 )
 

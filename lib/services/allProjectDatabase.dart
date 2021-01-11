@@ -15,7 +15,7 @@ class AllProjectsApiProvider {
     final response = await http.get('$url', headers: {
       HttpHeaders.contentTypeHeader: 'application/json',
     });
-    print(response.body.toString());
+    //print(response.body.toString());
 
     if (response.statusCode == 200) {
       if (jsonDecode(response.body)['statusText'] == 'error') {
@@ -38,9 +38,6 @@ class AllProjectsApiProvider {
       return false;
   }
 
-
-
-
   // Future<http.Response> createPost({String package_id, String time_taken, List<List<String>> labels }) async {
   //   final response = await http.post('$postUrl',
   //       headers: {
@@ -57,5 +54,3 @@ class AllProjectsApiProvider {
   // }
 
 }
-
-

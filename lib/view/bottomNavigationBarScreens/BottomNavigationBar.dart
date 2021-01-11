@@ -1,6 +1,8 @@
 import 'package:colorful_safe_area/colorful_safe_area.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:labelize/project_theme.dart';
+import 'package:labelize/services/constants.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/InfoScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/NotificationScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/SettingsScreen.dart';
@@ -14,11 +16,10 @@ class BottomNavigation extends StatefulWidget {
   BottomNavigation({this.index});
   @override
   _BottomNavigationState createState() => _BottomNavigationState();
-
-
 }
 
-class _BottomNavigationState extends State<BottomNavigation> {
+class _BottomNavigationState extends State<BottomNavigation>
+    with WidgetsBindingObserver {
   int _currentIndex = 2;
 
   @override
@@ -30,24 +31,103 @@ class _BottomNavigationState extends State<BottomNavigation> {
     InfoScreen()
   ];
 
-  PageController _pageController;
+  PageController _pageController = PageController(initialPage: 2);
+  final FirebaseMessaging _fcm = FirebaseMessaging();
 
+  String messageTitle = '';
+  String body = '';
+  int date = 0;
+  bool hasData = false;
 
+  getMessage() {
+    print('hello');
+    _fcm.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+
+        body = message['notification']['body'];
+
+        if (body != null) {
+          setState(() {
+            _currentIndex = 0;
+            NotificationMsgs.messageTitle = message['notification']['title'];
+            NotificationMsgs.body = message['notification']['body'];
+            NotificationMsgs.date =
+                DateTime.now().millisecondsSinceEpoch.toInt();
+          });
+          _pageController.jumpToPage(_currentIndex);
+        }
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+        body = message['data']['body'];
+
+        if (body != null) {
+          setState(() {
+            _currentIndex = 0;
+            NotificationMsgs.messageTitle = message['data']['title'];
+            NotificationMsgs.body = message['data']['body'];
+            NotificationMsgs.date = message['data']['google.sent_time'];
+          });
+          _pageController.jumpToPage(_currentIndex);
+        }
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+        body = message['data']['body'];
+
+        if (body != null) {
+          setState(() {
+            _currentIndex = 0;
+            NotificationMsgs.messageTitle = message['data']['title'];
+            NotificationMsgs.body = message['data']['body'];
+            NotificationMsgs.date = message['data']['google.sent_time'];
+          });
+          _pageController.jumpToPage(_currentIndex);
+        }
+      },
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     //  _pageController = PageController();
     //  _currentIndex = 2;
+    getMessage();
+    //_currentIndex = widget.index??2;
 
-    _currentIndex = widget.index??2;
-    _pageController = PageController(initialPage: _currentIndex);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // These are the callbacks
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // widget is resumed
+        getMessage();
+        _pageController.jumpToPage(_currentIndex);
+        print('resumed');
+        break;
+      case AppLifecycleState.inactive:
+        // widget is inactive
+        break;
+      case AppLifecycleState.paused:
+        // widget is paused
+        break;
+      case AppLifecycleState.detached:
+        // widget is detached
+        break;
+    }
   }
 
   @override

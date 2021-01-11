@@ -53,6 +53,7 @@ class _TasksScreenState extends State<TasksScreen> {
           checkBoxed.add(false);
           // adder.add('1');
         }
+        print('---------------${data.randomPackage.packageId}');
         // List<String> temp = ['1'];
         //
         // selectedLabels= List.filled(data.randomPackage.randomPackage.packages.length, temp );
@@ -139,7 +140,8 @@ class _TasksScreenState extends State<TasksScreen> {
                                 Navigator.pop(context);
                               } else
                                 customToast(
-                                    text: 'Your package has been failed to submit');
+                                    text:
+                                        'Your package has been failed to submit');
                               //Navigator
                             }
                           },

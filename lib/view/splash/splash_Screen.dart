@@ -16,23 +16,20 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   AnimationController _animationController;
   Animation<double> animation;
 
   final FirebaseMessaging _fcm = FirebaseMessaging();
   // final SaveNotificationFirebase saveNotificationFirebase = SaveNotificationFirebase();
 
-
   String messageTitle = '';
   String body = '';
   int date = 0;
   bool hasData = false;
 
-
-
-  getMessage()  {
+  getMessage() {
     print('hello');
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
@@ -40,22 +37,32 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
         body = message['notification']['body'];
 
-        if(body != null)
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>BottomNavigation(index: 0,)));
+        if (body != null)
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => BottomNavigation(
+                        index: 0,
+                      )));
 
-          //
-          // setState(() {
-          //   messageTitle = message['notification']['title'];
-          //   body = message['notification']['body'];
-          //
-          // });
+        //
+        // setState(() {
+        //   messageTitle = message['notification']['title'];
+        //   body = message['notification']['body'];
+        //
+        // });
       },
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
         body = message['data']['body'];
 
-        if(body != null)
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>BottomNavigation(index: 0,)));
+        if (body != null)
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => BottomNavigation(
+                        index: 0,
+                      )));
 
         // setState(() {
         //     hasData = true;
@@ -68,8 +75,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         print("onResume: $message");
         body = message['data']['body'];
 
-        if(body != null)
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>BottomNavigation(index: 0,)));
+        if (body != null)
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => BottomNavigation(
+                        index: 0,
+                      )));
 
         // setState(() {
         //     hasData = true;
@@ -81,43 +93,43 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
   }
 
-
-
   void initState() {
     super.initState();
-    getMessage();
+    // getMessage();
 
-    _animationController = AnimationController(duration: Duration(seconds: 2),vsync: this);
+    _animationController =
+        AnimationController(duration: Duration(seconds: 2), vsync: this);
 
+    final curvedAnimation = CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.bounceIn,
+        reverseCurve: Curves.easeOut);
 
-    final curvedAnimation = CurvedAnimation(parent: _animationController,curve: Curves.bounceIn,reverseCurve: Curves.easeOut);
-
-     animation = Tween<double>(begin: 0,end: 2*math.pi).animate(curvedAnimation)..addListener(() {
-       if(mounted)
-         setState(() {});
-     })..addStatusListener((status) {
-       if(status == AnimationStatus.completed)
-         _animationController.reverse();
-       else if(status == AnimationStatus.dismissed)
-         _animationController.forward();
-     });
-     _animationController.forward();
+    animation =
+        Tween<double>(begin: 0, end: 2 * math.pi).animate(curvedAnimation)
+          ..addListener(() {
+            if (mounted) setState(() {});
+          })
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed)
+              _animationController.reverse();
+            else if (status == AnimationStatus.dismissed)
+              _animationController.forward();
+          });
+    _animationController.forward();
 
     timer();
-
   }
 
-
-  void dispose (){
+  void dispose() {
     _animationController.dispose();
     super.dispose();
-
   }
 
-  void timer (){
+  void timer() {
     Timer(
       Duration(seconds: 3),
-          () async {
+      () async {
         final prefs = await SharedPreferences.getInstance();
         final prefsIsLogin = prefs.getBool('loggedIn');
         if (prefsIsLogin != null) {
@@ -133,16 +145,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
   }
 
-
-
-
-
   Widget build(BuildContext context) {
     var _height = MediaQuery.of(context).size.height;
     var _width = MediaQuery.of(context).size.width;
-
-
-
 
     return SafeArea(
       child: Scaffold(
@@ -152,7 +157,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             Positioned(
                 top: _height * 0.295,
                 left: _width * 0.28,
-                child: Transform.rotate(angle: animation.value,
+                child: Transform.rotate(
+                  angle: animation.value,
                   child: Image.asset('assets/Button-Icon-Round.png'),
                 ))
           ],
@@ -198,4 +204,3 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 fit: BoxFit.cover)));
   }
 }
-
