@@ -1,14 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:labelize/project_theme.dart';
 import 'package:labelize/services/constants.dart';
+import 'package:labelize/services/saveNotificationFirebase.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/InfoScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/NotificationScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/SettingsScreen.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/home.dart';
 // import 'file:///D:/Projects/labelize/lib/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/wallet.dart';
+import 'package:labelize/model/userModel.dart';
 
 class BottomNavigation extends StatefulWidget {
   static const routeName = '/Bbar';
@@ -33,6 +36,13 @@ class _BottomNavigationState extends State<BottomNavigation>
 
   PageController _pageController = PageController(initialPage: 2);
   final FirebaseMessaging _fcm = FirebaseMessaging();
+  final SaveNotificationFirebase saveNotificationFirebase =
+      SaveNotificationFirebase();
+  final CollectionReference user =
+      FirebaseFirestore.instance.collection('user');
+  final DocumentReference docUser =
+      FirebaseFirestore.instance.collection('user').doc(Constants.userId);
+  final UserModel userModel = UserModel();
 
   String messageTitle = '';
   String body = '';
@@ -41,6 +51,7 @@ class _BottomNavigationState extends State<BottomNavigation>
 
   getMessage() {
     print('hello');
+    _fcm.subscribeToTopic('everyone');
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
@@ -54,6 +65,15 @@ class _BottomNavigationState extends State<BottomNavigation>
             NotificationMsgs.body = message['notification']['body'];
             NotificationMsgs.date =
                 DateTime.now().millisecondsSinceEpoch.toInt();
+            user.doc(Constants.userId).update({
+              'notifications': FieldValue.arrayUnion([
+                {
+                  'messageTitle': NotificationMsgs.messageTitle,
+                  'body': NotificationMsgs.body,
+                  'createdAt': NotificationMsgs.date,
+                }
+              ])
+            });
           });
           _pageController.jumpToPage(_currentIndex);
         }
@@ -68,6 +88,15 @@ class _BottomNavigationState extends State<BottomNavigation>
             NotificationMsgs.messageTitle = message['data']['title'];
             NotificationMsgs.body = message['data']['body'];
             NotificationMsgs.date = message['data']['google.sent_time'];
+            user.doc(Constants.userId).update({
+              'notifications': FieldValue.arrayUnion([
+                {
+                  'messageTitle': NotificationMsgs.messageTitle,
+                  'body': NotificationMsgs.body,
+                  'createdAt': NotificationMsgs.date,
+                }
+              ])
+            });
           });
           _pageController.jumpToPage(_currentIndex);
         }
@@ -82,6 +111,15 @@ class _BottomNavigationState extends State<BottomNavigation>
             NotificationMsgs.messageTitle = message['data']['title'];
             NotificationMsgs.body = message['data']['body'];
             NotificationMsgs.date = message['data']['google.sent_time'];
+            user.doc(Constants.userId).update({
+              'notifications': FieldValue.arrayUnion([
+                {
+                  'messageTitle': NotificationMsgs.messageTitle,
+                  'body': NotificationMsgs.body,
+                  'createdAt': NotificationMsgs.date,
+                }
+              ])
+            });
           });
           _pageController.jumpToPage(_currentIndex);
         }
@@ -89,12 +127,36 @@ class _BottomNavigationState extends State<BottomNavigation>
     );
   }
 
+  // updateNotifications() async {
+  //   List yourItemList = [];
+  //   // for (int i = 0; i < docUser.collection(collectionPath).add(data) i++)
+  //   //   yourItemList.add({
+  //   //     'messageTitle': NotificationMsgs.messageTitle,
+  //   //     'body': NotificationMsgs.body,
+  //   //     'createdAt': NotificationMsgs.date,
+  //   //   });
+  //
+  //   return await user.doc(Constants.userId).update({
+  //     'notifications': FieldValue.arrayUnion([
+  //       {
+  //         'messageTitle': NotificationMsgs.messageTitle,
+  //         'body': NotificationMsgs.body,
+  //         'createdAt': NotificationMsgs.date,
+  //       }
+  //     ])
+  //   });
+  //
+  // }
+
   @override
   void initState() {
     super.initState();
     //  _pageController = PageController();
     //  _currentIndex = 2;
     getMessage();
+    // updateNotifications();
+    // saveNotificationFirebase.SaveNotification();
+
     //_currentIndex = widget.index??2;
 
     WidgetsBinding.instance.addObserver(this);

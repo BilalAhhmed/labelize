@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:labelize/model/userModel.dart';
 
+import 'constants.dart';
+
 class DatabaseService {
   final String uId;
   final String email;
@@ -10,18 +12,34 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('user');
   final FirebaseMessaging _fcm = FirebaseMessaging();
 
+
+
   Future UserData({
 
     String email,
     String userName,
     String password,
     String age,
+
   }) async {
+    String fcmToken = await _fcm.getToken();
     return await user.doc(uId).set({
       'email': email,
       'userName': userName,
       'password': password,
-      'age': ''
+      'age': '',
+      'token': {
+        'token': fcmToken,
+      },
+      'notifications':  [
+        {
+          'messageTitle': NotificationMsgs.messageTitle,
+          'body': NotificationMsgs.body,
+          'createdAt': NotificationMsgs.date,
+        }
+      ]
+
+
     });
 
   }
@@ -32,7 +50,10 @@ class DatabaseService {
           email: ds.data()['email'],
           userName: ds.data()['userName'],
           password: ds.data()['password'],
-          age: ds.data()['age']);
+          age: ds.data()['age'],
+          // notifications: List.from(ds.data()['notifications'])
+      );
+
     }).toList();
   }
 
@@ -57,3 +78,5 @@ class DatabaseService {
   }
 
 }
+
+

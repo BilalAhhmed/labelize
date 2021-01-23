@@ -1,6 +1,7 @@
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
+import 'package:labelize/services/constants.dart';
 import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
 import 'package:labelize/view/passwordReset/PasswordReset.dart';
 import 'package:labelize/view/signIn/signInScreen.dart';
@@ -10,6 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:labelize/services/fbAuth.dart';
 import 'package:labelize/services/googleAuth.dart';
 import 'package:labelize/services/tokenUpdate.dart';
+import 'package:labelize/widgets/CustomToast.dart';
 
 import '../../project_theme.dart';
 
@@ -36,8 +38,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isLoggingIn = false;
   bool checkedValue = false;
   bool checkUser = false;
+  bool isDisable = true;
 
-  final SaveDeviceToken _saveToken = SaveDeviceToken();
+  // final SaveDeviceToken _saveToken = SaveDeviceToken();
 
 
 
@@ -88,7 +91,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
               color: Color(0xFF1877F2),
               onPressed: () async {
                 await _fbLogin.LoginWithFacebook(context);
-                _saveToken.SavedeviceToken();
+                setState(() {
+                  Constants.socialLogin = true;
+                });
+                // _saveToken.SavedeviceToken();
                 Navigator.pushNamedAndRemoveUntil(
                     context, BottomNavigation.routeName, (route) => false);
               }),
@@ -111,8 +117,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             onPressed: () async {
               await _googleLogin.LoginWithGoogle(context);
               CircularProgressIndicator();
+              setState(() {
+                Constants.socialLogin = true;
+              });
 
-              _saveToken.SavedeviceToken();
+              // _saveToken.SavedeviceToken();
               Navigator.pushNamedAndRemoveUntil(
                   context, BottomNavigation.routeName, (route) => false);
             }
@@ -270,9 +279,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               onPressed: () async {
                 _register(context);
               },
-              color: isLoggingIn
+              color:
+                  checkedValue == false ? Colors.grey :
+              isLoggingIn
                   ? Colors.lightGreen
-                  : ProjectTheme.projectPrimaryColor,
+                  :
+              ProjectTheme.projectPrimaryColor,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
@@ -338,6 +350,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (checkedValue == true) {
         setState(() {
           isLoggingIn = true;
+          Constants.socialLogin = false;
+
         });
 
         if (isLoggingIn) {
@@ -355,13 +369,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
             _passwordController.clear();
             _userController.clear();
 
-            _saveToken.SavedeviceToken();
+            // _saveToken.SavedeviceToken();
 
             Navigator.pushNamedAndRemoveUntil(
                 context, BottomNavigation.routeName, (route) => false);
           }
         }
       }
+      else {
+      customToast(text: 'Please agree on Terms & Conditions');
+    }
     }
   }
 

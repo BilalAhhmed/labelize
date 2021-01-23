@@ -17,7 +17,7 @@ class ApiProvider {
         await http.get('$url+${uId}&project_id=${projectID}', headers: {
       HttpHeaders.contentTypeHeader: "application/json",
     });
-    print(response.body.toString());
+    // print(response.body.toString());
     print(response.headers['content-type']);
 
     if (response.statusCode == 200) {
@@ -41,9 +41,9 @@ class ApiProvider {
       return false;
   }
 
-  Stream<ApiModel> get stream {
-    return getPost().asStream();
-  }
+  // Stream<ApiModel> get stream {
+  //   return getPost().asStream();
+  // }
 
   Future<bool> createPost(
       {String package_id,

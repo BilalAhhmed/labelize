@@ -8,6 +8,7 @@ class Constants {
 
   static ApiModel apiModel;
   static AllProjectModel allProjectModel;
+  static bool socialLogin = false;
 }
 
 class NotificationMsgs {

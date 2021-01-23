@@ -2,6 +2,8 @@ import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
 import 'package:labelize/project_theme.dart';
 import 'package:customtogglebuttons/customtogglebuttons.dart';
+import 'package:labelize/services/paymentApi.dart';
+import 'package:labelize/widgets/CustomToast.dart';
 import 'package:labelize/widgets/roundedButton.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -10,6 +12,9 @@ class WalletScreen extends StatefulWidget {
 }
 
 class _WalletScreenState extends State<WalletScreen> {
+  PaymentApiProvider paymentApiProvider = PaymentApiProvider();
+  String paymenMethod = '';
+
   List<bool> _isSelected = [false, false];
   bool isLoggingIn = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -41,7 +46,6 @@ class _WalletScreenState extends State<WalletScreen> {
                     buildPaymentMethod(_height, _width),
                     buildForm(_height),
                     buildButton()
-
                   ],
                 ),
               ],
@@ -139,6 +143,22 @@ class _WalletScreenState extends State<WalletScreen> {
                       _isSelected[indexBtn] = false;
                     }
                   }
+                  if(_isSelected[0] == true) {
+                      setState(() {
+                          paymenMethod = 'Paypal';
+                      });
+                  }
+                  else if (_isSelected[1] == true){
+                      setState(() {
+                          paymenMethod = 'amazon';
+                      });
+                  }
+                  else {
+                      setState(() {
+                        paymenMethod = '';
+                      });
+                  }
+                  print(paymenMethod);
                 });
               },
             ),
@@ -164,32 +184,44 @@ class _WalletScreenState extends State<WalletScreen> {
               height: _height * 0.01,
             ),
             TextFormField(
-              controller: _creditController,
-              maxLines: 1,
-              validator: (value) {
-                if (value.isEmpty) return '';
-                return null;
-              },
-              decoration: kInputDecoration
-            ),
+                controller: _creditController,
+                maxLines: 1,
+                validator: (value) {
+                  if (value.isEmpty) return '';
+                  return null;
+                },
+                decoration: kInputDecoration),
             SizedBox(
               height: _height * 0.03,
             ),
             Text(
-              'Select the amount of credits',
+              'Enter your E-mail address',
               style: TextStyle(letterSpacing: 1, fontSize: 16),
             ),
             SizedBox(
               height: _height * 0.01,
             ),
             TextFormField(
-              controller: _emailController,
-              maxLines: 1,
-              validator: (value) {
-                if (value.isEmpty) return '';
-                return null;
-              },
-              decoration: kInputDecoration),
+                controller: _emailController,
+                maxLines: 1,
+                validator: (value) {
+                  if (value.isEmpty) return '';
+                  return null;
+                },
+                decoration: InputDecoration(
+                    hintText: 'E-mail address',
+                    hintStyle: TextStyle(color: Colors.grey, letterSpacing: 1, fontSize: 15),
+                    filled: true,
+                    fillColor: Colors.white,
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Color(0xFF4DD942)),
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(20),
+                        ),
+                    ),
+                )),
             SizedBox(
               height: _height * 0.18,
             ),
@@ -199,32 +231,62 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-
-  Widget buildButton (){
+  Widget buildButton() {
+      // dynamic amount = int.parse(_creditController.text);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30),
-      child: CustomRoundedButton(buttontitle: 'Request pay-out',onPressed: (){
-        if (_formKey.currentState.validate()) {
-          setState(() {
-            isLoggingIn = true;
-          });
-        }
-      },),
+      child: CustomRoundedButton(
+        buttontitle: 'Request pay-out',
+        onPressed: () async{
+            if(paymenMethod != '') {
+                if(int.parse(_creditController.text) >= 500){
+                    if (_formKey.currentState.validate()) {
+                    bool result = await paymentApiProvider.createPost(
+                        amount: int.parse(_creditController.text),
+                        email: _emailController.text,
+                        payment_type: paymenMethod);
+                    if (result) {
+                        customToast(
+                            text: 'Redeem request sent');
+                    } else {
+                        customToast(
+                            text: 'Redeem request failed');
+                    }
+                }
+
+                }
+                else{
+                    customToast(text: 'Please Type amount greater than or equal to 500');
+
+                }
+
+            }
+            else {
+                customToast(text: 'Please Select any Payment method');
+            }
+
+            setState(() {
+                _creditController.clear();
+                _emailController.clear();
+                _isSelected = [false, false];
+            });
+        },
+      ),
     );
   }
 
-
- static const kInputDecoration = InputDecoration(
-     hintText: 'Enter amount here (minimum 500 credits)',
-     hintStyle: TextStyle(
-         color:  Colors.grey,
-         letterSpacing: 1,
-         fontSize: 15),
-     filled: true,
-     fillColor: Colors.white,
-     focusedBorder: OutlineInputBorder(
-         borderSide: const BorderSide(color: Color(0xFF4DD942)),
-         borderRadius: BorderRadius.all(Radius.circular(20))),
-     border: OutlineInputBorder(
-         borderRadius: BorderRadius.all(Radius.circular(20),),),);
+  static const kInputDecoration = InputDecoration(
+    hintText: 'Enter amount here (minimum 500 credits)',
+    hintStyle: TextStyle(color: Colors.grey, letterSpacing: 1, fontSize: 15),
+    filled: true,
+    fillColor: Colors.white,
+    focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Color(0xFF4DD942)),
+        borderRadius: BorderRadius.all(Radius.circular(20))),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.all(
+        Radius.circular(20),
+      ),
+    ),
+  );
 }

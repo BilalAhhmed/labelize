@@ -29,7 +29,9 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool visibility = true;
   bool isLoggingIn = false;
-  final SaveDeviceToken _saveToken = SaveDeviceToken();
+  // final SaveDeviceToken _saveToken = SaveDeviceToken();
+
+
 
   getPrefs() async {
     final prefs = await SharedPreferences.getInstance();
@@ -94,7 +96,11 @@ class _SignInScreenState extends State<SignInScreen> {
             color: Color(0xFF1877F2),
               onPressed: () async {
                 await _fbLogin.LoginWithFacebook(context);
-                _saveToken.SavedeviceToken();
+                // _saveToken.SavedeviceToken();
+
+                setState(() {
+                  Constants.socialLogin = true;
+                });
                 Navigator.pushNamedAndRemoveUntil(
                     context, BottomNavigation.routeName, (route) => false);
               }
@@ -121,8 +127,11 @@ class _SignInScreenState extends State<SignInScreen> {
               onPressed: () async {
                 await _googleLogin.LoginWithGoogle(context);
                 CircularProgressIndicator();
+                setState(() {
+                  Constants.socialLogin = true;
+                });
 
-                _saveToken.SavedeviceToken();
+                // _saveToken.SavedeviceToken();
                 Navigator.pushNamedAndRemoveUntil(
                     context, BottomNavigation.routeName, (route) => false);
               }
@@ -234,6 +243,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 if (_formKey.currentState.validate()) {
                   setState(() {
                     isLoggingIn = true;
+                    Constants.socialLogin = false;
                     //
                   });
                   if (isLoggingIn) {

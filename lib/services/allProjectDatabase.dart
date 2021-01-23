@@ -30,7 +30,7 @@ class AllProjectsApiProvider {
     }
   }
 
-  Future<bool> getPackages({String projectId}) async {
+  Future<bool> getPackages() async {
     Constants.allProjectModel = await getPost();
     if (Constants.allProjectModel != null) {
       return true;

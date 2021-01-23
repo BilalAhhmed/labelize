@@ -45,8 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } else {
       if (mounted) {
-        customToast(text: 'You are out of attempts');
-        Navigator.pop(context);
+        customToast(text: 'There are no package at the moment.');
+        // Navigator.pop(context);
       }
     }
   }
@@ -64,12 +64,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return ColorfulSafeArea(
       color: ProjectTheme.projectBackgroundColor,
       child: Scaffold(
-        body: !hasData
-            ? Padding(
-                padding: EdgeInsets.only(
-                    top: _height * 0.4, left: _width * 0.41, right: 20),
-                child: CircularProgressIndicator())
-            : Container(
+        body:
+        // !hasData
+        //     ? Align(alignment: Alignment.center,
+        //         child: CircularProgressIndicator())
+        //     :
+        Container(
                 height: _height,
                 color: ProjectTheme.navigationBackgroundColor,
                 child: SingleChildScrollView(
@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        buildTopText(_height, _width),
+                        buildTopText(_height, _width, data),
                         buildContainer(_height, _width, data),
                       ],
                     ),
@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildTopText(double _height, double width) {
+  Widget buildTopText(double _height, double width, AllProjectModel data) {
     return Stack(
       children: [
         Align(
@@ -107,8 +107,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         Align(
           alignment: Alignment.topRight,
-          child: Text(
-            '500\nCREDITS'.toUpperCase(),
+          child: Text(!hasData? '0\nCREDITS' :
+            '${data.data.projects[_index].creditsPerPackage}\nCREDITS'.toUpperCase(),
             textAlign: TextAlign.center,
             style: TextStyle(
               letterSpacing: 1,
@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Radius.circular(20),
         ),
       ),
-      child: buildCenterContent(_height, _width, data),
+      child: !hasData? Center(child: Text('Coming Soon...',style: TextStyle(fontSize: 20),),) : buildCenterContent(_height, _width, data),
     );
   }
 
@@ -151,10 +151,12 @@ class _HomeScreenState extends State<HomeScreen> {
       double _height, double _width, AllProjectModel data) {
     TextStyle style = TextStyle(fontSize: 15, letterSpacing: 1);
     return Swiper(
+      index: _index,
       controller: _scrollController,
-      loop: false,
+      // loop: false,
       itemCount: _taskList.length,
-      itemBuilder: (BuildContext context, int index) {
+
+      itemBuilder: (BuildContext context, int index) {print(_index);
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,11 +175,11 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(
                 height: _height * 0.045,
               ),
-              Text('${data.data.projects[index].description}', style: style),
+              Text(      '${data.data.projects[index].description}', style: style),
               SizedBox(
                 height: _height * 0.05,
               ),
-              CustomRoundedButton(
+             CustomRoundedButton(
                 buttontitle: 'Fetch the Task',
                 onPressed: () {
                   Navigator.push(
@@ -185,6 +187,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(
                           builder: (_) => TasksScreen(
                                 projectId: data.data.projects[index].projectId,
+                            maxAnswers: int.parse(data.data.projects[index].maxAnswersPerPackage,)
+
                               )));
                   //  Navigator.pushNamed(context, TasksScreen.routeName);
                 },

@@ -14,13 +14,16 @@ class TasksScreen extends StatefulWidget {
   static const routeName = '/Tasks';
 
   String projectId;
-  TasksScreen({this.projectId});
+  int maxAnswers;
+  TasksScreen({this.projectId, this.maxAnswers});
 
   @override
   _TasksScreenState createState() => _TasksScreenState();
 }
 
 class _TasksScreenState extends State<TasksScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   ApiProvider apiProvider = ApiProvider();
   ApiModel data;
 
@@ -32,7 +35,7 @@ class _TasksScreenState extends State<TasksScreen> {
   List<bool> checkBoxed = [];
   List<String> adder = [];
 
-  bool selected = false;
+  bool selector = false;
 
   bool submit = false;
   bool hasData = false;
@@ -53,7 +56,8 @@ class _TasksScreenState extends State<TasksScreen> {
           checkBoxed.add(false);
           // adder.add('1');
         }
-        print('---------------${data.randomPackage.packageId}');
+        print('user id ${Constants.userId}');
+        print('package id: ${data.randomPackage.packageId}');
         // List<String> temp = ['1'];
         //
         // selectedLabels= List.filled(data.randomPackage.randomPackage.packages.length, temp );
@@ -78,9 +82,7 @@ class _TasksScreenState extends State<TasksScreen> {
       color: ProjectTheme.projectBackgroundColor,
       child: Scaffold(
         body: !hasData
-            ? Padding(
-                padding: EdgeInsets.only(
-                    top: _height * 0.4, left: _width * 0.41, right: 20),
+            ?Align(alignment: Alignment.center,
                 child: CircularProgressIndicator())
             : SingleChildScrollView(
                 child: Padding(
@@ -107,42 +109,52 @@ class _TasksScreenState extends State<TasksScreen> {
                               Map<String, List<String>> tempMap = {
                                 'labels': temp
                               };
-                              selectedLabels.add(tempMap);
+                              print(checkBoxed);
+                              if (checkBoxed.contains(true)) {
+                                selectedLabels.add(tempMap);
+                              }
                               print(_index);
                               print(selectedLabels);
                             });
+                            if (checkBoxed.contains(true)) {
+                              if (_index < _taskList.length - 1) {
+                                setState(() {
+                                  _index++;
 
-                            if (_index < _taskList.length - 1) {
-                              setState(() {
-                                _index++;
+                                  checkBoxed.clear();
 
-                                for (int i = 0;
-                                    i <
-                                        data.randomPackage.randomPackage
-                                            .packages[_index].labels.length;
-                                    i++) {
-                                  checkBoxed.insert(i, false);
+                                  for (int i = 0;
+                                      i <
+                                          data.randomPackage.randomPackage
+                                              .packages[_index].labels.length;
+                                      i++) {
+                                    checkBoxed.insert(i, false);
+                                  }
+                                  adder.clear();
+
+                                  if (_index == _taskList.length - 1)
+                                    submit = !submit;
+                                });
+                              } else if (submit) {
+                                print(data.randomPackage.packageId);
+                                // print('Your paper is submitted');
+                                bool result = await apiProvider.createPost(
+                                    labels: selectedLabels,
+                                    package_id: data.randomPackage.packageId,
+                                    time_taken: '11:11');
+                                if (result) {
+                                  customToast(
+                                      text: 'Your task has been submitted');
+                                  Navigator.pop(context);
+                                } else {
+                                  customToast(
+                                      text: 'Your task is failed to submit');
+                                  Navigator.pop(context);
                                 }
-                                adder.clear();
-
-                                if (_index == _taskList.length - 1)
-                                  submit = !submit;
-                              });
-                            } else if (submit) {
-                              // print('Your paper is submitted');
-                              bool result = await apiProvider.createPost(
-                                  labels: selectedLabels,
-                                  package_id: data.randomPackage.packageId,
-                                  time_taken: '11:11');
-                              if (result) {
-                                customToast(
-                                    text: 'Your package has been submitted');
-                                Navigator.pop(context);
-                              } else
-                                customToast(
-                                    text:
-                                        'Your package has been failed to submit');
-                              //Navigator
+                              }
+                            } else {
+                              customToast(
+                                  text: 'Please select any option/options');
                             }
                           },
                         ),
@@ -244,18 +256,21 @@ class _TasksScreenState extends State<TasksScreen> {
   }
 
   Widget buildAnswers(double _height, double _width, ApiModel data) {
-    return Container(
-        height: _height * 0.35,
-        child: ListView.builder(
-            shrinkWrap: true,
-            physics: BouncingScrollPhysics(),
-            itemCount:
-                data.randomPackage.randomPackage.packages[_index].labels.length,
-            itemBuilder: (BuildContext ctxt, int index) {
-              return buildAnswersContainer(_height,
-                  '${data.randomPackage.randomPackage.packages[_index].labels[index]}',
-                  value: checkBoxed[index], index: index);
-            }));
+    return Form(
+      key: _formKey,
+      child: Container(
+          height: _height * 0.35,
+          child: ListView.builder(
+              shrinkWrap: true,
+              physics: BouncingScrollPhysics(),
+              itemCount: data
+                  .randomPackage.randomPackage.packages[_index].labels.length,
+              itemBuilder: (BuildContext ctxt, int index) {
+                return buildAnswersContainer(_height,
+                    '${data.randomPackage.randomPackage.packages[_index].labels[index]}',
+                    value: checkBoxed[index], index: index);
+              })),
+    );
   }
 
   Widget buildAnswersContainer(double _height, String _title,
@@ -275,36 +290,56 @@ class _TasksScreenState extends State<TasksScreen> {
                     color: Colors.black, offset: Offset(0, 0), spreadRadius: 1),
               ],
             ),
-            child: Row(
-              children: [
-                CircularCheckBox(
-                    checkColor: Colors.black,
-                    activeColor: Colors.transparent,
-                    value: value, //selected,
-                    materialTapTargetSize: MaterialTapTargetSize.padded,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        checkBoxed.removeAt(index);
-                        checkBoxed.insert(index, newValue);
-                        if (checkBoxed.elementAt(index) == true) {
-                          adder.add(_title);
-                        } else {
-                          if (adder.contains(_title)) {
-                            adder.remove(_title);
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  if (checkBoxed[index] == false) {
+                    checkBoxed[index] = true;
+                  } else {
+                    checkBoxed[index] = false;
+                  }
+                });
+                setState(() {
+                  if (checkBoxed.elementAt(index) == true) {
+                    adder.add(_title);
+                  } else {
+                    if (adder.contains(_title)) {
+                      adder.remove(_title);
+                    }
+                  }
+                  //print(adder);
+                  // selected = newValue;
+                });
+              },
+              child: Row(
+                children: [
+                  CircularCheckBox(
+                      checkColor: Colors.black,
+                      activeColor: Colors.transparent,
+                      value: value, //selected,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onChanged: (bool newValue) {
+                        setState(() {
+                          checkBoxed.removeAt(index);
+                          checkBoxed.insert(index, newValue);
+                          if (checkBoxed.elementAt(index) == true) {
+                            adder.add(_title);
+                          } else {
+                            if (adder.contains(_title)) {
+                              adder.remove(_title);
+                            }
                           }
-                          // print(checkBoxed);
-                          // adder.removeAt(index);
-                        }
-                        //print(adder);
-                        // selected = newValue;
-                      });
-                    }),
-                SizedBox(width: 15),
-                Text(
-                  _title,
-                  style: TextStyle(fontSize: 17),
-                )
-              ],
+                          //print(adder);
+                          // selected = newValue;
+                        });
+                      }),
+                  SizedBox(width: 15),
+                  Text(
+                    _title,
+                    style: TextStyle(fontSize: 17),
+                  )
+                ],
+              ),
             ),
           ),
         ),

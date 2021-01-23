@@ -30,7 +30,6 @@ class _SplashScreenState extends State<SplashScreen>
   bool hasData = false;
 
   getMessage() {
-    print('hello');
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
@@ -96,6 +95,7 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     // getMessage();
+    // print(Constants.socialLogin);
 
     _animationController =
         AnimationController(duration: Duration(seconds: 2), vsync: this);
@@ -130,17 +130,23 @@ class _SplashScreenState extends State<SplashScreen>
     Timer(
       Duration(seconds: 3),
       () async {
-        final prefs = await SharedPreferences.getInstance();
+
+        // if (Constants.socialLogin == false) {
+          final prefs = await SharedPreferences.getInstance();
         final prefsIsLogin = prefs.getBool('loggedIn');
+
+
         if (prefsIsLogin != null) {
           if (prefsIsLogin) {
             _signInWithEmailAndPassword(context);
           } else {
             Navigator.pushNamed(context, SignUpScreen.routeName);
           }
-        } else {
+        }
+        else {
           await Navigator.pushNamed(context, SignUpScreen.routeName);
         }
+
       },
     );
   }
@@ -154,12 +160,10 @@ class _SplashScreenState extends State<SplashScreen>
         body: Stack(
           children: [
             buildBackgroundImage(context, _height),
-            Positioned(
-                top: _height * 0.295,
-                left: _width * 0.28,
+            Align(alignment: Alignment.center,
                 child: Transform.rotate(
                   angle: animation.value,
-                  child: Image.asset('assets/Button-Icon-Round.png'),
+                  child: Image.asset('assets/logo.png'),
                 ))
           ],
         ),
@@ -200,7 +204,7 @@ class _SplashScreenState extends State<SplashScreen>
         height: _height,
         decoration: BoxDecoration(
             image: DecorationImage(
-                image: AssetImage("assets/background/background.png"),
+                image: AssetImage("assets/Splash.png"),
                 fit: BoxFit.cover)));
   }
 }
