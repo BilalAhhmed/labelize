@@ -47,7 +47,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     if (!snapshot.hasData) {
                       return Center(
                           child: CircularProgressIndicator(
-                        backgroundColor: ProjectTheme.projectPrimaryColor,
                       ));
                     }
                     List<UserModel> use = snapshot.data;

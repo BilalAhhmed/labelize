@@ -151,6 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
       double _height, double _width, AllProjectModel data) {
     TextStyle style = TextStyle(fontSize: 15, letterSpacing: 1);
     return Swiper(
+      onIndexChanged: (int index){
+        setState(() {
+          _index = index;
+        });
+      },
       index: _index,
       controller: _scrollController,
       // loop: false,
@@ -182,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
              CustomRoundedButton(
                 buttontitle: 'Fetch the Task',
                 onPressed: () {
+
                   Navigator.push(
                       context,
                       MaterialPageRoute(

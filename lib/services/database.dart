@@ -25,6 +25,7 @@ class DatabaseService {
       'email': email,
       'userName': userName,
       'password': password,
+      'credits' : 0,
       'age': '',
       'token': {
         'token': fcmToken,

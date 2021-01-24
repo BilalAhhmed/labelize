@@ -112,90 +112,72 @@ class _NotificationScreenState extends State<NotificationScreen> {
     var _width = MediaQuery.of(context).size.width;
     return ColorfulSafeArea(
       child: Scaffold(
-          body: StreamBuilder(
-              stream: database.userStream,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                }
-
-                List<UserModel> use = snapshot.data;
-                int index = 0;
-                for (int i = 0; i < use.length; i++) {
-                  if (Constants.user.email == use[i].email) {
-                    index = i;
-                    break;
+        backgroundColor:  ProjectTheme.navigationBackgroundColor,
+          body: SingleChildScrollView(
+            child: StreamBuilder(
+                stream: database.userStream,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
                   }
-                }
-                UserModel data = snapshot.data[index];
-                // print(data.notification);
 
-                return ListView(
-                  shrinkWrap: true,
-                  physics: BouncingScrollPhysics(),
-                  children: [
-                    Container(
-                        padding: const EdgeInsets.all(30),
-                        color: ProjectTheme.navigationBackgroundColor,
-                        height: _height * 0.85,
-                        child: Column(
-                          children: [
-                            Text(
-                              'Notifications',
-                              style: TextStyle(
-                                  fontSize: 40, fontWeight: FontWeight.w300),
-                            ),
-                            data.notification.length == 1
-                                ? Padding(
-                                    padding: EdgeInsets.only(
-                                        top: _height * 0.3, right: 20),
-                                    child: Text(
-                                      'No Notiifications',
-                                      style: TextStyle(fontSize: 20),
-                                    ))
-                                : ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: BouncingScrollPhysics(),
-                                    reverse: true,
-                                    itemCount: data.notification.length - 1,
-                                    itemBuilder: (context, index) {
-                                      return ListTile(
-                                        title: Text(
-                                            '${data.notification[index + 1]['messageTitle']}'),
-                                        subtitle: Text(
-                                            '${data.notification[index + 1]['body']}'),
-                                        trailing: Text(
-                                            '${Helper.getDateNtime(DateTime.fromMicrosecondsSinceEpoch(data.notification[index + 1]['createdAt'] * 1000))}'),
-                                      );
-                                    })
-                            // }),
-                          ],
-                        )
+                  List<UserModel> use = snapshot.data;
+                  int index = 0;
+                  for (int i = 0; i < use.length; i++) {
+                    if (Constants.user.email == use[i].email) {
+                      index = i;
+                      break;
+                    }
+                  }
+                  UserModel data = snapshot.data[index];
+                  // print(data.notification);
 
-                        //     ListTile(
-                        //       title: Text('Notification 2'),
-                        //       subtitle: Text('content 2'),
-                        //       trailing: Text(
-                        //         Helper.getDateNtime(
-                        //           DateTime.now(),
-                        //         ),
-                        //       ),
-                        //     ),
-                        //     ListTile(
-                        //       title: Text('Notification 3'),
-                        //       subtitle: Text('content 3'),
-                        //       trailing: Text(
-                        //         Helper.getDateNtime(
-                        //           DateTime.now(),
-                        //         ),
-                        //       ),
-                        //     )
-                        //   ],
-                        // )
-                        ),
-                  ],
-                );
-              })),
+                  return ListView(
+                    shrinkWrap: true,
+                    physics: BouncingScrollPhysics(),
+                    children: [
+                      Container(
+                          padding: const EdgeInsets.all(30),
+                          // color: ProjectTheme.navigationBackgroundColor,
+
+                          child: Column(
+                            children: [
+                              Text(
+                                'Notifications',
+                                style: TextStyle(
+                                    fontSize: 40, fontWeight: FontWeight.w300),
+                              ),
+                              data.notification.length == 1
+                                  ? Padding(
+                                      padding: EdgeInsets.only(
+                                          top: _height * 0.3, right: 20),
+                                      child: Text(
+                                        'No Notiifications',
+                                        style: TextStyle(fontSize: 20),
+                                      ))
+                                  : ListView.builder(
+                                      shrinkWrap: true,
+                                      physics: BouncingScrollPhysics(),
+                                      reverse: true,
+                                      itemCount: data.notification.length - 1,
+                                      itemBuilder: (context, index) {
+                                        return ListTile(
+                                          title: Text(
+                                              '${data.notification[index + 1]['messageTitle']}'),
+                                          subtitle: Text(
+                                              '${data.notification[index + 1]['body']}'),
+                                          trailing: Text(
+                                              '${Helper.getDateNtime(DateTime.fromMicrosecondsSinceEpoch(data.notification[index + 1]['createdAt'] * 1000))}'),
+                                        );
+                                      })
+                            ],
+                          )
+                          
+                          ),
+                    ],
+                  );
+                }),
+          )),
     );
   }
 }

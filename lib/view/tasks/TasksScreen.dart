@@ -1,5 +1,6 @@
 import 'package:circular_check_box/circular_check_box.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
+import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:labelize/model/apiModel.dart';
 import 'package:labelize/project_theme.dart';
@@ -124,6 +125,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                           child: CustomRoundedButton(
                                             buttontitle: 'Back',
                                             onPressed: () {
+
                                               setState(() {
                                                 if(_index != 0 ){
                                                   _index--;
@@ -223,6 +225,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                                         submit = !submit;
                                                     });
                                                   } else if (submit) {
+                                                    // bool internet = await DataConnectionChecker().hasConnection;
                                                     endTime = DateTime.now();
                                                     var duration = DateTime.now().difference(startTime);
                                                     String timer = duration.toString().substring(2,7);
@@ -252,6 +255,10 @@ class _TasksScreenState extends State<TasksScreen> {
                                                               'Your task is failed to submit');
                                                       Navigator.pop(context);
                                                     }
+                                                  // }
+                                                  //   else {
+                                                  //     customToast(text: 'No internet Connection');
+                                                  //   }
                                                   }
                                                 } else {
                                                   customToast(

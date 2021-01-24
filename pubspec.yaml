@@ -47,6 +47,7 @@ dependencies:
   flutter_swiper: ^1.1.6
   dio: ^3.0.10
   firebase_messaging: ^5.1.4
+  data_connection_checker: ^0.3.4
 
 dev_dependencies:
   flutter_test:

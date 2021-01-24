@@ -16,7 +16,7 @@ class UserModel {
   String age;
   Token token;
   String email;
-  int credits;
+  int credits = 0;
   List<dynamic> notification;
 }
 

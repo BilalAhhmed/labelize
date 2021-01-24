@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/labelizeFinal.iml" filepath="$PROJECT_DIR$/.idea/modules/labelizeFinal.iml" group="labelizeFinal" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/labelizeFinal1.iml" filepath="$PROJECT_DIR$/.idea/modules/labelizeFinal1.iml" group="labelizeFinal1" />
     </modules>
   </component>
 </project>
