@@ -17,7 +17,7 @@ class UserModel {
   Token token;
   String email;
   int credits;
-  List<Notification> notification;
+  List<dynamic> notification;
 }
 
 class Notification {
@@ -39,15 +39,6 @@ class Token {
 
   String token;
 }
-
-
-
-
-
-
-
-
-
 
 // class UserModel {
 //   UserModel({

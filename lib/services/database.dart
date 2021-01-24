@@ -12,17 +12,13 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('user');
   final FirebaseMessaging _fcm = FirebaseMessaging();
 
-
-
   Future UserData({
-
     String email,
     String userName,
     String password,
     String age,
     // List<Map<String, dynamic>> notifications,
     int credits,
-
   }) async {
     String fcmToken = await _fcm.getToken();
     return await user.doc(uId).set({
@@ -33,54 +29,67 @@ class DatabaseService {
       'token': {
         'token': fcmToken,
       },
-      'notifications':  [
+      'notifications': [
         {
           'messageTitle': NotificationMsgs.messageTitle,
           'body': NotificationMsgs.body,
           'createdAt': NotificationMsgs.date,
         }
       ]
-
-
     });
-
   }
 
   List<UserModel> getuser(QuerySnapshot qs) {
-    return qs.docs.map((ds) {
-      return UserModel(
-          email: ds.data()['email'],
-          userName: ds.data()['userName'],
-          password: ds.data()['password'],
-          age: ds.data()['age'],
-          credits: ds.data()['credits'],
-          notification: ds.data()['notifications'],
-        // token: ds.data()['token']
-      );
-
-    }).toList();
+    // print(qs.docs[0].data()['notifications']);
+    List<UserModel> users = List();
+    try {
+      qs.docs.forEach((element) {
+        // List<Notification> lister = List
+        users.add(UserModel(
+          email: element.data()['email'],
+          userName: element.data()['userName'],
+          password: element.data()['password'],
+          age: element.data()['age'],
+          credits: element.data()['credits'],
+          notification: element.data()['notifications'],
+          // token: ds.data()['token']
+        ));
+      });
+      print(users.length);
+      return users;
+    } catch (e) {
+      print('----------${e.toString()}');
+    }
+    List<Notification> a = List();
+    // return qs.docs.map((ds) {
+    //   return UserModel(
+    //     email: ds.data()['email'],
+    //     userName: ds.data()['userName'],
+    //     password: ds.data()['password'],
+    //     age: ds.data()['age'],
+    //     credits: ds.data()['credits'],
+    //     notification: ds.data()['notifications'],
+    //     // token: ds.data()['token']
+    //   );
+    // }).toList();
   }
 
   Stream<List<UserModel>> get userStream {
-    return user.snapshots().map(getuser);
+    try {
+      return user.snapshots().map(getuser);
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
-   Future _savedeviceToken() async{
-
+  Future _savedeviceToken() async {
     String fcmToken = await _fcm.getToken();
-    if (fcmToken != null ){
-      var tokens = user
-          .doc(uId)
-          .collection('tokens')
-          .doc(fcmToken);
+    if (fcmToken != null) {
+      var tokens = user.doc(uId).collection('tokens').doc(fcmToken);
       await tokens.set({
         'token': fcmToken,
         'createdAt': FieldValue.serverTimestamp(),
       });
     }
-
   }
-
 }
-
-
