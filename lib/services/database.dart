@@ -20,6 +20,8 @@ class DatabaseService {
     String userName,
     String password,
     String age,
+    // List<Map<String, dynamic>> notifications,
+    int credits,
 
   }) async {
     String fcmToken = await _fcm.getToken();
@@ -51,7 +53,9 @@ class DatabaseService {
           userName: ds.data()['userName'],
           password: ds.data()['password'],
           age: ds.data()['age'],
-          // notifications: List.from(ds.data()['notifications'])
+          credits: ds.data()['credits'],
+          notification: ds.data()['notifications'],
+        // token: ds.data()['token']
       );
 
     }).toList();

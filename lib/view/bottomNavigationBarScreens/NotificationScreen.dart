@@ -34,6 +34,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
   String body = '';
   int date = 0;
   bool hasData = false;
+  getData(){
+    userdata.doc(Constants.userId).get().then((value){
+
+      print(value['token']);
+    } );
+  }
 
   // getMessage() {
   //   _fcm.configure(
@@ -77,6 +83,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   void initState() {
     super.initState();
+   // getData();
 
     // saveNotificationFirebase.SaveNotification();
     //  getMessage();
@@ -154,10 +161,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 //         itemBuilder: (BuildContext context, index) {
                                 //           return
                                 ListTile(
-                                    title: Text('${data.notifications[1]['messageTitle']}'),
-                                    subtitle: Text('${data.notifications[1]['body']}'),
+                                    title: Text('${data.notification[0].messageTitle}'),
+                                    subtitle: Text('${data.notification[0].body}'),
                                     trailing: Text(
-                                        '${Helper.getDateNtime(DateTime.fromMicrosecondsSinceEpoch(data.notifications[1]['createdAt'] * 1000))}'),
+                                        '${Helper.getDateNtime(DateTime.fromMicrosecondsSinceEpoch(data.notification[0].createdAt.toInt() * 1000))}'),
                                   )
                             // }),
                           ],

@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:labelize/project_theme.dart';
 import 'package:labelize/view/signIn/signInScreen.dart';
+import 'package:labelize/widgets/CustomToast.dart';
 
 class PasswordResetScreen extends StatefulWidget {
     static const routeName = '/password-change';
@@ -10,6 +12,7 @@ class PasswordResetScreen extends StatefulWidget {
 }
 
 class _PasswordResetScreenState extends State<PasswordResetScreen> {
+    var firebaseAuth = FirebaseAuth.instance;
     final TextEditingController _emailController = TextEditingController();
     final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
     bool isLoggingIn = false;
@@ -116,12 +119,12 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                     height: _height * 0.07,
                     width: _width * .82,
                     child: FlatButton(
-                        onPressed: () {
+                        onPressed: () async {
                             if (_formKey.currentState.validate()) {
-                                setState(() {
-                                    isLoggingIn = true;
-                                    Navigator.pushNamed(context, SignInScreen.routeName);
-                                });
+                                        await firebaseAuth.sendPasswordResetEmail(email: _emailController.text);
+                                        customToast(text: 'Password reset link has been sent on your email ');
+                                        Navigator.pushNamed(context, SignInScreen.routeName);
+
                             }
                         },
                         color: ProjectTheme.projectPrimaryColor,

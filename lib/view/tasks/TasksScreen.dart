@@ -27,6 +27,9 @@ class _TasksScreenState extends State<TasksScreen> {
   ApiProvider apiProvider = ApiProvider();
   ApiModel data;
 
+  DateTime startTime;
+  DateTime endTime;
+
   AllProjectModel allProjectModel;
 
   int _index = 0;
@@ -39,11 +42,15 @@ class _TasksScreenState extends State<TasksScreen> {
 
   bool submit = false;
   bool hasData = false;
+  bool submitTrue = false;
+  bool newPackage = false;
 
   getData() async {
     bool result =
         await apiProvider.getPackages(projectId: '${widget.projectId}');
     setState(() {
+      startTime = DateTime.now();
+      newPackage = true;
       hasData = result;
     });
     if (hasData) {
@@ -55,6 +62,8 @@ class _TasksScreenState extends State<TasksScreen> {
             i++) {
           checkBoxed.add(false);
           // adder.add('1');
+          List list = checkBoxed.where((element) => element == true).toList();
+          print('new list: $list');
         }
         print('user id ${Constants.userId}');
         print('package id: ${data.randomPackage.packageId}');
@@ -74,6 +83,11 @@ class _TasksScreenState extends State<TasksScreen> {
     getData();
   }
 
+  void dispose() {
+    super.dispose();
+    // getData();
+  }
+
   @override
   Widget build(BuildContext context) {
     var _height = MediaQuery.of(context).size.height;
@@ -81,89 +95,184 @@ class _TasksScreenState extends State<TasksScreen> {
     return ColorfulSafeArea(
       color: ProjectTheme.projectBackgroundColor,
       child: Scaffold(
-        body: !hasData
-            ?Align(alignment: Alignment.center,
-                child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 30, right: 30, top: 10),
-                  child: Column(
-                    children: [
-                      buildTopContent(_height),
-                      buildContainer(_height, _width, data),
-                      buildAnswers(_height, _width, data),
-                      SizedBox(
-                        height: _height * 0.02,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: CustomRoundedButton(
-                          buttontitle: submit ? 'Submit' : 'Next text',
-                          onPressed: () async {
-                            setState(() {
-                              List<String> temp = [];
-                              adder.forEach((element) {
-                                temp.add(element);
-                              });
-                              // selectedLabels.add(temp);
-                              Map<String, List<String>> tempMap = {
-                                'labels': temp
-                              };
-                              print(checkBoxed);
-                              if (checkBoxed.contains(true)) {
-                                selectedLabels.add(tempMap);
-                              }
-                              print(_index);
-                              print(selectedLabels);
-                            });
-                            if (checkBoxed.contains(true)) {
-                              if (_index < _taskList.length - 1) {
-                                setState(() {
-                                  _index++;
+          body: !hasData
+              ? Align(
+                  alignment: Alignment.center,
+                  child: CircularProgressIndicator())
+              : !newPackage
+                  ? Align(
+                      alignment: Alignment.center,
+                      child: CircularProgressIndicator())
+                  : !submitTrue
+                      ? SingleChildScrollView(
+                          child: Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 30, right: 30, top: 10),
+                              child: Column(
+                                children: [
+                                  buildTopContent(_height),
+                                  buildContainer(_height, _width, data),
+                                  buildAnswers(_height, _width, data),
+                                  SizedBox(
+                                    height: _height * 0.02,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                          width: _width * 0.35,
+                                          child: CustomRoundedButton(
+                                            buttontitle: 'Back',
+                                            onPressed: () {
+                                              setState(() {
+                                                if(_index != 0 ){
+                                                  _index--;
+                                                  selectedLabels.removeAt(_index);
 
-                                  checkBoxed.clear();
+                                                  checkBoxed.clear();
+                                                  for (int i = 0;
+                                                  i <
+                                                      data
+                                                          .randomPackage
+                                                          .randomPackage
+                                                          .packages[
+                                                      _index]
+                                                          .labels
+                                                          .length;
+                                                  i++) {
+                                                    checkBoxed.insert(
+                                                        i, false);
+                                                  }
+                                                  adder.clear();
+                                                  print(checkBoxed);
 
-                                  for (int i = 0;
-                                      i <
-                                          data.randomPackage.randomPackage
-                                              .packages[_index].labels.length;
-                                      i++) {
-                                    checkBoxed.insert(i, false);
-                                  }
-                                  adder.clear();
+                                                  if(_index < 0 ){
+                                                    setState(() {
+                                                      _index =0;
+                                                    });
+                                                  }
+                                                }
+                                                else {
+                                                  null;
+                                                }
 
-                                  if (_index == _taskList.length - 1)
-                                    submit = !submit;
-                                });
-                              } else if (submit) {
-                                print(data.randomPackage.packageId);
-                                // print('Your paper is submitted');
-                                bool result = await apiProvider.createPost(
-                                    labels: selectedLabels,
-                                    package_id: data.randomPackage.packageId,
-                                    time_taken: '11:11');
-                                if (result) {
-                                  customToast(
-                                      text: 'Your task has been submitted');
-                                  Navigator.pop(context);
-                                } else {
-                                  customToast(
-                                      text: 'Your task is failed to submit');
-                                  Navigator.pop(context);
-                                }
-                              }
-                            } else {
-                              customToast(
-                                  text: 'Please select any option/options');
-                            }
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-      ),
+                                              });
+                                              // print('removed: $selectedLabels');
+                                              // print(_index);
+                                            },
+                                          )),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20),
+                                        child: SizedBox(
+                                          width: _width * 0.35,
+                                          child: CustomRoundedButton(
+                                            buttontitle:
+                                                submit ? 'Submit' : 'Next text',
+                                            onPressed: () async {
+                                              List listofMaxanswers = checkBoxed
+                                                  .where((element) =>
+                                                      element == true)
+                                                  .toList();
+                                              setState(() {
+                                                List<String> temp = [];
+                                                adder.forEach((element) {
+                                                  temp.add(element);
+                                                });
+                                                // selectedLabels.add(temp);
+                                                Map<String, List<String>>
+                                                    tempMap = {'labels': temp};
+                                                // print(checkBoxed);
+                                                if (checkBoxed.contains(true)) {
+                                                  if (listofMaxanswers.length <=
+                                                      widget.maxAnswers)
+                                                    selectedLabels.add(tempMap);
+                                                }
+                                                print(_index);
+                                                print(selectedLabels);
+                                              });
+
+                                              print(
+                                                  'new list1: $listofMaxanswers');
+
+                                              if (checkBoxed.contains(true)) {
+                                                if (listofMaxanswers.length <=
+                                                    widget.maxAnswers) {
+                                                  if (_index <
+                                                      _taskList.length - 1) {
+                                                    setState(() {
+                                                      _index++;
+                                                      checkBoxed.clear();
+                                                      for (int i = 0;
+                                                          i <
+                                                              data
+                                                                  .randomPackage
+                                                                  .randomPackage
+                                                                  .packages[
+                                                                      _index]
+                                                                  .labels
+                                                                  .length;
+                                                          i++) {
+                                                        checkBoxed.insert(
+                                                            i, false);
+                                                      }
+                                                      adder.clear();
+
+                                                      if (_index ==
+                                                          _taskList.length - 1)
+                                                        submit = !submit;
+                                                    });
+                                                  } else if (submit) {
+                                                    endTime = DateTime.now();
+                                                    var duration = DateTime.now().difference(startTime);
+                                                    String timer = duration.toString().substring(2,7);
+                                                    print(timer);
+                                                    print(data.randomPackage
+                                                        .packageId);
+                                                    // print('Your paper is submitted');
+                                                    bool result = await apiProvider
+                                                        .createPost(
+                                                            labels:
+                                                                selectedLabels,
+                                                            package_id: data
+                                                                .randomPackage
+                                                                .packageId,
+                                                            time_taken:
+                                                                timer);
+                                                    if (result) {
+                                                      // customToast(
+                                                      //     text: 'Your task has been submitted');
+                                                      setState(() {
+                                                        submitTrue = true;
+
+                                                      });
+                                                    } else {
+                                                      customToast(
+                                                          text:
+                                                              'Your task is failed to submit');
+                                                      Navigator.pop(context);
+                                                    }
+                                                  }
+                                                } else {
+                                                  customToast(
+                                                      text:
+                                                          'You can not select more than ${widget.maxAnswers} labels for this package');
+                                                }
+                                              } else {
+                                                customToast(
+                                                    text:
+                                                        'Please select any option/options');
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              )),
+                        )
+                      : buildSubmit(_height, _width)),
     );
   }
 
@@ -347,6 +456,50 @@ class _TasksScreenState extends State<TasksScreen> {
           height: _height * 0.025,
         )
       ],
+    );
+  }
+
+  Widget buildSubmit(double height, double width) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 30, right: 30, top: 10),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Your package is successfully submitted',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+          ),
+          SizedBox(
+            height: height * 0.06,
+          ),
+          CustomRoundedButton(
+            buttontitle: 'Return to Homepage',
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          SizedBox(
+            height: height * 0.03,
+          ),
+          CustomRoundedButton(
+            buttontitle: 'Fetch a new Task',
+            onPressed: () async {
+              setState(() {
+                if (mounted) {
+                  _index = 0;
+                  newPackage = false;
+                  selectedLabels.clear();
+                  submit = false;
+                  checkBoxed.clear();
+                  adder.clear();
+                  submitTrue = false;
+                }
+              });
+              await getData();
+            },
+          )
+        ],
+      ),
     );
   }
 }

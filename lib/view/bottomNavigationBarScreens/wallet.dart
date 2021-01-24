@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
 import 'package:flutter/material.dart';
+import 'package:labelize/model/userModel.dart';
 import 'package:labelize/project_theme.dart';
 import 'package:customtogglebuttons/customtogglebuttons.dart';
+import 'package:labelize/services/constants.dart';
+import 'package:labelize/services/database.dart';
 import 'package:labelize/services/paymentApi.dart';
 import 'package:labelize/widgets/CustomToast.dart';
 import 'package:labelize/widgets/roundedButton.dart';
@@ -13,6 +17,10 @@ class WalletScreen extends StatefulWidget {
 
 class _WalletScreenState extends State<WalletScreen> {
   PaymentApiProvider paymentApiProvider = PaymentApiProvider();
+  DatabaseService database = DatabaseService(uId: Constants.userId);
+  final CollectionReference userdata =
+      FirebaseFirestore.instance.collection('user');
+  UserModel user;
   String paymenMethod = '';
 
   List<bool> _isSelected = [false, false];
@@ -28,33 +36,49 @@ class _WalletScreenState extends State<WalletScreen> {
     return ColorfulSafeArea(
         color: ProjectTheme.projectBackgroundColor,
         child: Scaffold(
-          body: Container(
-            color: ProjectTheme.navigationBackgroundColor,
-            height: _height,
-            child: ListView(
-              shrinkWrap: true,
-              physics: BouncingScrollPhysics(),
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    buildTopContent(_height),
-                    Divider(
-                      color: Colors.grey.withOpacity(0.3),
-                      thickness: 1,
+            body: StreamBuilder(
+                stream: database.userStream,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  List<UserModel> use = snapshot.data;
+                  int index = 0;
+                  for (int i = 0; i < use.length; i++) {
+                    if (Constants.user.email == use[i].email) {
+                      index = i;
+                      break;
+                    }
+                  }
+                  UserModel data = snapshot.data[index];
+                  return Container(
+                    color: ProjectTheme.navigationBackgroundColor,
+                    height: _height,
+                    child: ListView(
+                      shrinkWrap: true,
+                      physics: BouncingScrollPhysics(),
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            buildTopContent(_height, data),
+                            Divider(
+                              color: Colors.grey.withOpacity(0.3),
+                              thickness: 1,
+                            ),
+                            buildPaymentMethod(_height, _width),
+                            buildForm(_height),
+                            buildButton()
+                          ],
+                        ),
+                      ],
                     ),
-                    buildPaymentMethod(_height, _width),
-                    buildForm(_height),
-                    buildButton()
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ));
+                  );
+                })));
   }
 
-  Widget buildTopContent(double _height) {
+  Widget buildTopContent(double _height, UserModel data) {
     TextStyle style = TextStyle(letterSpacing: 1, fontSize: 16);
     return Padding(
       padding: const EdgeInsets.only(left: 30, right: 30, top: 10),
@@ -72,7 +96,7 @@ class _WalletScreenState extends State<WalletScreen> {
             height: _height * 0.05,
           ),
           Text(
-            'Balance:\n500 Credits',
+            'Balance:\n${data.credits}',
             textAlign: TextAlign.center,
             style: style,
           ),
@@ -143,20 +167,18 @@ class _WalletScreenState extends State<WalletScreen> {
                       _isSelected[indexBtn] = false;
                     }
                   }
-                  if(_isSelected[0] == true) {
-                      setState(() {
-                          paymenMethod = 'Paypal';
-                      });
-                  }
-                  else if (_isSelected[1] == true){
-                      setState(() {
-                          paymenMethod = 'amazon';
-                      });
-                  }
-                  else {
-                      setState(() {
-                        paymenMethod = '';
-                      });
+                  if (_isSelected[0] == true) {
+                    setState(() {
+                      paymenMethod = 'Paypal';
+                    });
+                  } else if (_isSelected[1] == true) {
+                    setState(() {
+                      paymenMethod = 'amazon';
+                    });
+                  } else {
+                    setState(() {
+                      paymenMethod = '';
+                    });
                   }
                   print(paymenMethod);
                 });
@@ -209,18 +231,19 @@ class _WalletScreenState extends State<WalletScreen> {
                   return null;
                 },
                 decoration: InputDecoration(
-                    hintText: 'E-mail address',
-                    hintStyle: TextStyle(color: Colors.grey, letterSpacing: 1, fontSize: 15),
-                    filled: true,
-                    fillColor: Colors.white,
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFF4DD942)),
-                        borderRadius: BorderRadius.all(Radius.circular(20))),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(20),
-                        ),
+                  hintText: 'E-mail address',
+                  hintStyle: TextStyle(
+                      color: Colors.grey, letterSpacing: 1, fontSize: 15),
+                  filled: true,
+                  fillColor: Colors.white,
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Color(0xFF4DD942)),
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(20),
                     ),
+                  ),
                 )),
             SizedBox(
               height: _height * 0.18,
@@ -232,44 +255,38 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
   Widget buildButton() {
-      // dynamic amount = int.parse(_creditController.text);
+    // dynamic amount = int.parse(_creditController.text);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30),
       child: CustomRoundedButton(
         buttontitle: 'Request pay-out',
-        onPressed: () async{
-            if(paymenMethod != '') {
-                if(int.parse(_creditController.text) >= 500){
-                    if (_formKey.currentState.validate()) {
-                    bool result = await paymentApiProvider.createPost(
-                        amount: int.parse(_creditController.text),
-                        email: _emailController.text,
-                        payment_type: paymenMethod);
-                    if (result) {
-                        customToast(
-                            text: 'Redeem request sent');
-                    } else {
-                        customToast(
-                            text: 'Redeem request failed');
-                    }
+        onPressed: () async {
+          if (paymenMethod != '') {
+            if (int.parse(_creditController.text) >= 500) {
+              if (_formKey.currentState.validate()) {
+                bool result = await paymentApiProvider.createPost(
+                    amount: int.parse(_creditController.text),
+                    email: _emailController.text,
+                    payment_type: paymenMethod);
+                if (result) {
+                  customToast(text: 'Redeem request sent');
+                } else {
+                  customToast(text: 'Redeem request failed');
                 }
-
-                }
-                else{
-                    customToast(text: 'Please Type amount greater than or equal to 500');
-
-                }
-
+              }
+            } else {
+              customToast(
+                  text: 'Please Type amount greater than or equal to 500');
             }
-            else {
-                customToast(text: 'Please Select any Payment method');
-            }
+          } else {
+            customToast(text: 'Please Select any Payment method');
+          }
 
-            setState(() {
-                _creditController.clear();
-                _emailController.clear();
-                _isSelected = [false, false];
-            });
+          setState(() {
+            _creditController.clear();
+            _emailController.clear();
+            _isSelected = [false, false];
+          });
         },
       ),
     );
