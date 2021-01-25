@@ -4,6 +4,12 @@ import 'package:labelize/model/apiModel.dart';
 import 'package:http/http.dart' as http;
 import 'package:labelize/services/constants.dart';
 
+class ErrorMessage
+{
+  static bool internetStatus = false;
+  static String message;
+}
+
 class ApiProvider {
   String url =
       'https://us-central1-labelize-9aab6.cloudfunctions.net/getRandomPackageForUser?user_id=';
@@ -72,13 +78,22 @@ class ApiProvider {
           print('error');
           return false;
         } else {
+          ErrorMessage.internetStatus = false;
           return true;
         }
       } else {
         // throw Exception('Failed to load Data');
         return false;
       }
-    } catch (e) {
+    }
+    on SocketException {
+
+      ErrorMessage.internetStatus = true;
+      ErrorMessage.message = 'No internet try again';
+      return false;
+
+    }
+    catch (e) {
       print(e.toString());
     }
   }

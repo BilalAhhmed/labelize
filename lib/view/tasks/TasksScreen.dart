@@ -4,6 +4,7 @@ import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:labelize/model/apiModel.dart';
 import 'package:labelize/project_theme.dart';
+import 'package:labelize/services/redistributionApi.dart';
 import 'package:labelize/services/singleApiDatabase.dart';
 import 'package:labelize/services/constants.dart';
 import 'package:labelize/widgets/CustomToast.dart';
@@ -22,10 +23,11 @@ class TasksScreen extends StatefulWidget {
   _TasksScreenState createState() => _TasksScreenState();
 }
 
-class _TasksScreenState extends State<TasksScreen> {
+class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   ApiProvider apiProvider = ApiProvider();
+  RedistributionApi redistributionApi = RedistributionApi();
   ApiModel data;
 
   DateTime startTime;
@@ -45,6 +47,7 @@ class _TasksScreenState extends State<TasksScreen> {
   bool hasData = false;
   bool submitTrue = false;
   bool newPackage = false;
+  bool internet = false;
 
   getData() async {
     bool result =
@@ -62,15 +65,13 @@ class _TasksScreenState extends State<TasksScreen> {
             i < data.randomPackage.randomPackage.packages[0].labels.length;
             i++) {
           checkBoxed.add(false);
-          // adder.add('1');
+
           List list = checkBoxed.where((element) => element == true).toList();
           print('new list: $list');
         }
         print('user id ${Constants.userId}');
         print('package id: ${data.randomPackage.packageId}');
-        // List<String> temp = ['1'];
-        //
-        // selectedLabels= List.filled(data.randomPackage.randomPackage.packages.length, temp );
+
       });
     } else {
       customToast(text: 'You are out of attempts');
@@ -78,15 +79,47 @@ class _TasksScreenState extends State<TasksScreen> {
     }
   }
 
+  void redistribution() async{
+    await redistributionApi.createPost(
+        package_id: data.randomPackage.packageId);
+  }
+
   @override
   void initState() {
     super.initState();
     getData();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   void dispose() {
+    // redistribution();
     super.dispose();
     // getData();
+  }
+
+
+
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // These are the callbacks
+    switch (state) {
+      case AppLifecycleState.resumed:
+      // widget is resumed
+
+        break;
+      case AppLifecycleState.inactive:
+      // widget is inactive
+        break;
+      case AppLifecycleState.paused:
+      // widget is paused
+        break;
+      case AppLifecycleState.detached:
+      // widget is detached
+        WidgetsBinding.instance.removeObserver(this);
+        redistribution();
+        break;
+    }
   }
 
   @override
@@ -125,39 +158,35 @@ class _TasksScreenState extends State<TasksScreen> {
                                           child: CustomRoundedButton(
                                             buttontitle: 'Back',
                                             onPressed: () {
-
                                               setState(() {
-                                                if(_index != 0 ){
+                                                if (_index != 0) {
                                                   _index--;
-                                                  selectedLabels.removeAt(_index);
+                                                  selectedLabels
+                                                      .removeAt(_index);
 
                                                   checkBoxed.clear();
                                                   for (int i = 0;
-                                                  i <
-                                                      data
-                                                          .randomPackage
-                                                          .randomPackage
-                                                          .packages[
-                                                      _index]
-                                                          .labels
-                                                          .length;
-                                                  i++) {
-                                                    checkBoxed.insert(
-                                                        i, false);
+                                                      i <
+                                                          data
+                                                              .randomPackage
+                                                              .randomPackage
+                                                              .packages[_index]
+                                                              .labels
+                                                              .length;
+                                                      i++) {
+                                                    checkBoxed.insert(i, false);
                                                   }
                                                   adder.clear();
                                                   print(checkBoxed);
 
-                                                  if(_index < 0 ){
+                                                  if (_index < 0) {
                                                     setState(() {
-                                                      _index =0;
+                                                      _index = 0;
                                                     });
                                                   }
-                                                }
-                                                else {
+                                                } else {
                                                   null;
                                                 }
-
                                               });
                                               // print('removed: $selectedLabels');
                                               // print(_index);
@@ -188,7 +217,11 @@ class _TasksScreenState extends State<TasksScreen> {
                                                 if (checkBoxed.contains(true)) {
                                                   if (listofMaxanswers.length <=
                                                       widget.maxAnswers)
-                                                    selectedLabels.add(tempMap);
+
+                                                    if(selectedLabels.length < data.randomPackage.randomPackage.packages.length)
+                                                      {
+                                                        selectedLabels.add(tempMap);
+                                                      }
                                                 }
                                                 print(_index);
                                                 print(selectedLabels);
@@ -225,40 +258,52 @@ class _TasksScreenState extends State<TasksScreen> {
                                                         submit = !submit;
                                                     });
                                                   } else if (submit) {
-                                                    // bool internet = await DataConnectionChecker().hasConnection;
+                                                    // internet = await DataConnectionChecker().hasConnection;
+
+                                                    // if(internet) {
                                                     endTime = DateTime.now();
-                                                    var duration = DateTime.now().difference(startTime);
-                                                    String timer = duration.toString().substring(2,7);
+                                                    var duration =
+                                                        DateTime.now()
+                                                            .difference(
+                                                                startTime);
+                                                    String timer = duration
+                                                        .toString()
+                                                        .substring(2, 7);
                                                     print(timer);
                                                     print(data.randomPackage
                                                         .packageId);
                                                     // print('Your paper is submitted');
-                                                    bool result = await apiProvider
-                                                        .createPost(
+                                                    bool result =
+                                                        await apiProvider.createPost(
                                                             labels:
                                                                 selectedLabels,
                                                             package_id: data
                                                                 .randomPackage
                                                                 .packageId,
-                                                            time_taken:
-                                                                timer);
-                                                    if (result) {
-                                                      // customToast(
-                                                      //     text: 'Your task has been submitted');
-                                                      setState(() {
-                                                        submitTrue = true;
-
-                                                      });
-                                                    } else {
-                                                      customToast(
-                                                          text:
+                                                            time_taken: timer);
+                                                    if(ErrorMessage.internetStatus)
+                                                      {
+                                                        customToast(text: ErrorMessage.message);
+                                                      }
+                                                    else
+                                                      {
+                                                        if (result) {
+                                                          // customToast(
+                                                          //     text: 'Your task has been submitted');
+                                                          setState(() {
+                                                            submitTrue = true;
+                                                          });
+                                                        } else {
+                                                          customToast(
+                                                              text:
                                                               'Your task is failed to submit');
-                                                      Navigator.pop(context);
-                                                    }
-                                                  // }
-                                                  //   else {
-                                                  //     customToast(text: 'No internet Connection');
-                                                  //   }
+                                                          Navigator.pop(context);
+                                                        }
+                                                      }
+                                                    // }
+                                                    //   else {
+                                                    //     customToast(text: 'No internet Connection');
+                                                    //   }
                                                   }
                                                 } else {
                                                   customToast(
@@ -295,7 +340,10 @@ class _TasksScreenState extends State<TasksScreen> {
                 ),
                 color: Colors.black,
               ),
-              onPressed: () {
+              onPressed: () async {
+                await redistributionApi.createPost(
+                    package_id: data.randomPackage.packageId);
+                print('redistribution done');
                 Navigator.pop(context);
               }),
         ),
