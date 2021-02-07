@@ -8,6 +8,7 @@ import 'package:labelize/services/constants.dart';
 import 'package:labelize/services/database.dart';
 import 'package:labelize/services/paymentApi.dart';
 import 'package:labelize/widgets/CustomToast.dart';
+import 'package:labelize/widgets/customCircularLoader.dart';
 import 'package:labelize/widgets/roundedButton.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -25,6 +26,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
   List<bool> _isSelected = [false, false];
   bool isLoggingIn = false;
+  bool isRequest = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _creditController = TextEditingController();
@@ -69,7 +71,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             ),
                             buildPaymentMethod(_height, _width),
                             buildForm(_height),
-                            buildButton()
+                            buildButton(data)
                           ],
                         ),
                       ],
@@ -254,26 +256,42 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget buildButton() {
+  Widget buildButton(UserModel data) {
     // dynamic amount = int.parse(_creditController.text);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30),
       child: CustomRoundedButton(
         buttontitle: 'Request pay-out',
         onPressed: () async {
+
           if (paymenMethod != '') {
             if (int.parse(_creditController.text) >= 500) {
-              if (_formKey.currentState.validate()) {
-                bool result = await paymentApiProvider.createPost(
-                    amount: int.parse(_creditController.text),
-                    email: _emailController.text,
-                    payment_type: paymenMethod);
-                if (result) {
-                  customToast(text: 'Redeem request sent');
-                } else {
-                  customToast(text: 'Redeem request failed');
+              if(int.parse(_creditController.text) <= data.credits)
+                {
+                  if (_formKey.currentState.validate()) {
+                    CustomCircularLoader(context);
+                    bool result = await paymentApiProvider.createPost(
+                        amount: int.parse(_creditController.text),
+                        email: _emailController.text,
+                        payment_type: paymenMethod);
+                    if (result) {
+                      setState(() {
+                        _creditController.clear();
+                        _emailController.clear();
+                        _isSelected = [false, false];
+                      });
+                      customToast(text: 'Redeem request sent');
+                    } else {
+                      customToast(text: 'You already have a pending request!');
+                    }
+                  }
+                  Navigator.pop(context);
                 }
+              else {
+                customToast(text: 'You can not request more than your current balance');
               }
+
+
             } else {
               customToast(
                   text: 'Please Type amount greater than or equal to 500');
@@ -282,11 +300,7 @@ class _WalletScreenState extends State<WalletScreen> {
             customToast(text: 'Please Select any Payment method');
           }
 
-          setState(() {
-            _creditController.clear();
-            _emailController.clear();
-            _isSelected = [false, false];
-          });
+
         },
       ),
     );
@@ -307,3 +321,6 @@ class _WalletScreenState extends State<WalletScreen> {
     ),
   );
 }
+
+
+

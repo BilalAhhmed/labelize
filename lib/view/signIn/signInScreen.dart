@@ -29,6 +29,8 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool visibility = true;
   bool isLoggingIn = false;
+  bool emailCheck = false;
+  bool passwordCheck = false;
   // final SaveDeviceToken _saveToken = SaveDeviceToken();
 
 
@@ -95,9 +97,9 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
             color: Color(0xFF1877F2),
               onPressed: () async {
-                await _fbLogin.LoginWithFacebook(context);
-                // _saveToken.SavedeviceToken();
 
+                await _fbLogin.LoginWithFacebook(context);
+                CircularProgressIndicator();
                 setState(() {
                   Constants.socialLogin = true;
                 });
@@ -131,7 +133,6 @@ class _SignInScreenState extends State<SignInScreen> {
                   Constants.socialLogin = true;
                 });
 
-                // _saveToken.SavedeviceToken();
                 Navigator.pushNamedAndRemoveUntil(
                     context, BottomNavigation.routeName, (route) => false);
               }
@@ -159,6 +160,17 @@ class _SignInScreenState extends State<SignInScreen> {
             validator: (value) {
               if (value.isEmpty) return '';
               return null;
+            },
+            onChanged: (String value) {
+              if(value != ''){
+                setState(() {
+                  emailCheck =true;
+                });}
+              else {
+                setState(() {
+                  emailCheck = false;
+                });
+              }
             },
             decoration: InputDecoration(
                 hintText: 'Username',
@@ -188,7 +200,20 @@ class _SignInScreenState extends State<SignInScreen> {
           TextFormField(
             style: TextStyle(letterSpacing: 5),
             obscureText: visibility,
+            onChanged: (String value) {
+              if(value != ''){
+                setState(() {
+                  passwordCheck =true;
+                });}
+              else {
+                setState(() {
+                  passwordCheck = false;
+                });
+              }
+              },
+
             controller: _passwordController,
+
             validator: (value) {
               if (value.isEmpty) return '';
               return null;
@@ -251,7 +276,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   }
                 }
               },
-              color: isLoggingIn
+              color: (emailCheck && passwordCheck) == false? Colors.grey
+                  : isLoggingIn
                   ? Colors.lightGreen
                   : ProjectTheme.projectPrimaryColor,
               child: Padding(
@@ -274,7 +300,28 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             )),
         SizedBox(
-          height: _height * .1,
+          height: _height * .02,
+        ),
+        InkWell(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Don't have an account? " ),
+              Text(
+                'Sign Up',
+                style: TextStyle(
+                    color: ProjectTheme.projectPrimaryColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15),
+              ),
+            ],
+          ),
+          onTap: () {
+            Navigator.pushNamed(context, SignUpScreen.routeName);
+          },
+        ),
+        SizedBox(
+          height: _height * .03,
         ),
         InkWell(
           child: Text(

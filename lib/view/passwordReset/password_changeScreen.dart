@@ -7,6 +7,7 @@ import 'package:labelize/services/constants.dart';
 import 'package:labelize/services/database.dart';
 import 'package:labelize/view/signUp/signUppScreen.dart';
 import 'package:labelize/widgets/CustomToast.dart';
+import 'package:labelize/widgets/customCircularLoader.dart';
 import 'package:labelize/widgets/roundedButton.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -191,12 +192,14 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                     if (_oldPassController.text == data.password) {
                         if (_oldPassController.text != _newPassController.text) {
                             if (_newPassController.text == _confirmPassController.text) {
+                                CustomCircularLoader(context);
                                 Constants.user
                                     .updatePassword(_newPassController.text.trim())
                                     .then((_) async {
                                     await userdata
                                         .doc(Constants.user.uid)
                                         .update({'password': _newPassController.text.trim()});
+                                    Navigator.pop(context);
                                     customToast(text: "Successfully changed");
 
                                     final prefs = await SharedPreferences.getInstance();

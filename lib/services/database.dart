@@ -26,6 +26,7 @@ class DatabaseService {
       'userName': userName,
       'password': password,
       'credits' : 0,
+      'maxCreditsAllowed' : 1000,
       'age': '',
       'token': {
         'token': fcmToken,
@@ -93,4 +94,8 @@ class DatabaseService {
       });
     }
   }
+
+
+
+
 }

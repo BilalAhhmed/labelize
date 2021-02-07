@@ -1,30 +1,39 @@
 import 'package:circular_check_box/circular_check_box.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:colorful_safe_area/colorful_safe_area.dart';
-import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_awesome_alert_box/flutter_awesome_alert_box.dart';
 import 'package:labelize/model/apiModel.dart';
+import 'package:labelize/model/userModel.dart';
 import 'package:labelize/project_theme.dart';
 import 'package:labelize/services/redistributionApi.dart';
 import 'package:labelize/services/singleApiDatabase.dart';
 import 'package:labelize/services/constants.dart';
+import 'package:labelize/view/bottomNavigationBarScreens/BottomNavigationBar.dart';
+import 'package:labelize/view/bottomNavigationBarScreens/home.dart';
 import 'package:labelize/widgets/CustomToast.dart';
+import 'package:labelize/widgets/customCircularLoader.dart';
 import 'package:labelize/widgets/roundedButton.dart';
 import 'package:labelize/model/allProjectsModel.dart';
 import 'package:labelize/widgets/CustomToast.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class TasksScreen extends StatefulWidget {
   static const routeName = '/Tasks';
 
   String projectId;
   int maxAnswers;
+
   TasksScreen({this.projectId, this.maxAnswers});
 
   @override
   _TasksScreenState createState() => _TasksScreenState();
 }
 
-class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
+class _TasksScreenState extends State<TasksScreen> with WidgetsBindingObserver {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  UserModel credit = UserModel();
 
   ApiProvider apiProvider = ApiProvider();
   RedistributionApi redistributionApi = RedistributionApi();
@@ -49,6 +58,8 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
   bool newPackage = false;
   bool internet = false;
 
+  String maxCreditsAllowedPerUser;
+
   getData() async {
     bool result =
         await apiProvider.getPackages(projectId: '${widget.projectId}');
@@ -71,7 +82,6 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
         }
         print('user id ${Constants.userId}');
         print('package id: ${data.randomPackage.packageId}');
-
       });
     } else {
       customToast(text: 'You are out of attempts');
@@ -79,47 +89,30 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
     }
   }
 
-  void redistribution() async{
-    await redistributionApi.createPost(
-        package_id: data.randomPackage.packageId);
+  getMaxUsers() async {
+    await FirebaseFirestore.instance
+        .collection('config')
+        .doc('website')
+        .get()
+        .then((snapshot) {
+      setState(() {
+        maxCreditsAllowedPerUser =
+            snapshot.data()['maxCreditsAllowedPerUser'].toString();
+      });
+      print(maxCreditsAllowedPerUser);
+    });
   }
 
   @override
   void initState() {
     super.initState();
     getData();
+    getMaxUsers();
     WidgetsBinding.instance.addObserver(this);
   }
 
   void dispose() {
-    // redistribution();
     super.dispose();
-    // getData();
-  }
-
-
-
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
-    // These are the callbacks
-    switch (state) {
-      case AppLifecycleState.resumed:
-      // widget is resumed
-
-        break;
-      case AppLifecycleState.inactive:
-      // widget is inactive
-        break;
-      case AppLifecycleState.paused:
-      // widget is paused
-        break;
-      case AppLifecycleState.detached:
-      // widget is detached
-        WidgetsBinding.instance.removeObserver(this);
-        redistribution();
-        break;
-    }
   }
 
   @override
@@ -216,12 +209,15 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
                                                 // print(checkBoxed);
                                                 if (checkBoxed.contains(true)) {
                                                   if (listofMaxanswers.length <=
-                                                      widget.maxAnswers)
-
-                                                    if(selectedLabels.length < data.randomPackage.randomPackage.packages.length)
-                                                      {
-                                                        selectedLabels.add(tempMap);
-                                                      }
+                                                      widget.maxAnswers) if (selectedLabels
+                                                          .length <
+                                                      data
+                                                          .randomPackage
+                                                          .randomPackage
+                                                          .packages
+                                                          .length) {
+                                                    selectedLabels.add(tempMap);
+                                                  }
                                                 }
                                                 print(_index);
                                                 print(selectedLabels);
@@ -273,6 +269,8 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
                                                     print(data.randomPackage
                                                         .packageId);
                                                     // print('Your paper is submitted');
+                                                    CustomCircularLoader(
+                                                        context);
                                                     bool result =
                                                         await apiProvider.createPost(
                                                             labels:
@@ -281,25 +279,26 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
                                                                 .randomPackage
                                                                 .packageId,
                                                             time_taken: timer);
-                                                    if(ErrorMessage.internetStatus)
-                                                      {
-                                                        customToast(text: ErrorMessage.message);
+                                                    if (ErrorMessage
+                                                        .internetStatus) {
+                                                      customToast(
+                                                          text: ErrorMessage
+                                                              .message);
+                                                    } else {
+                                                      if (result) {
+                                                        // customToast(
+                                                        //     text: 'Your task has been submitted');
+                                                        setState(() {
+                                                          submitTrue = true;
+                                                        });
+                                                      } else {
+                                                        customToast(
+                                                            text:
+                                                                'Your task is failed to submit');
+                                                        Navigator.pop(context);
                                                       }
-                                                    else
-                                                      {
-                                                        if (result) {
-                                                          // customToast(
-                                                          //     text: 'Your task has been submitted');
-                                                          setState(() {
-                                                            submitTrue = true;
-                                                          });
-                                                        } else {
-                                                          customToast(
-                                                              text:
-                                                              'Your task is failed to submit');
-                                                          Navigator.pop(context);
-                                                        }
-                                                      }
+                                                      Navigator.pop(context);
+                                                    }
                                                     // }
                                                     //   else {
                                                     //     customToast(text: 'No internet Connection');
@@ -324,7 +323,7 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
                                 ],
                               )),
                         )
-                      : buildSubmit(_height, _width)),
+                      : buildSubmit(_height, _width, credit)),
     );
   }
 
@@ -340,11 +339,24 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
                 ),
                 color: Colors.black,
               ),
-              onPressed: () async {
-                await redistributionApi.createPost(
-                    package_id: data.randomPackage.packageId);
-                print('redistribution done');
-                Navigator.pop(context);
+              onPressed: () {
+                ConfirmAlertBox(
+                    title: 'Exit',
+                    buttonColorForNo: Colors.grey,
+                    buttonColorForYes: ProjectTheme.projectPrimaryColor,
+                    infoMessage: 'Are you sure you want to exit?',
+                    context: context,
+                    icon: Icons.clear,
+                    onPressedYes: () async {
+                      await redistributionApi.createPost(
+                          package_id: data.randomPackage.packageId);
+                      print('redistribution done');
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  BottomNavigation()));
+                    });
               }),
         ),
         Align(
@@ -480,7 +492,8 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
                   CircularCheckBox(
                       checkColor: Colors.black,
                       activeColor: Colors.transparent,
-                      value: value, //selected,
+                      value: value,
+                      //selected,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       onChanged: (bool newValue) {
                         setState(() {
@@ -514,7 +527,7 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
     );
   }
 
-  Widget buildSubmit(double height, double width) {
+  Widget buildSubmit(double height, double width, UserModel credit) {
     return Padding(
       padding: const EdgeInsets.only(left: 30, right: 30, top: 10),
       child: Column(
@@ -539,18 +552,23 @@ class _TasksScreenState extends State<TasksScreen>with WidgetsBindingObserver {
           CustomRoundedButton(
             buttontitle: 'Fetch a new Task',
             onPressed: () async {
-              setState(() {
-                if (mounted) {
-                  _index = 0;
-                  newPackage = false;
-                  selectedLabels.clear();
-                  submit = false;
-                  checkBoxed.clear();
-                  adder.clear();
-                  submitTrue = false;
-                }
-              });
-              await getData();
+              int max = int.parse(maxCreditsAllowedPerUser);
+              if (credit.credits < max) {
+                setState(() {
+                  if (mounted) {
+                    _index = 0;
+                    newPackage = false;
+                    selectedLabels.clear();
+                    submit = false;
+                    checkBoxed.clear();
+                    adder.clear();
+                    submitTrue = false;
+                  }
+                });
+                await getData();
+              } else {
+                customToast(text: "User have achieved it's max Credits limit");
+              }
             },
           )
         ],
